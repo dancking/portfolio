@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pandora — Retention Analysis Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --felt:#1B2B44;
+    --felt-dark:#0D1726;
+    --cream:#F0F4F8;
+    --paper:#FFFFFF;
+    --ink:#1E293B;
+    --crimson:#225BC6; /* Adapted to Pandora Blue */
+    --gold:#38BDF8; /* Adapted to Light Blue */
+    --line: rgba(30,41,59,0.12);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    line-height:1.6;
+  }
+  h1,h2,h3{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    margin:0;
+  }
+  .eyebrow{
+    display:flex;
+    align-items:center;
+    gap:.5em;
+    font-size:.78rem;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--crimson);
+    font-weight:600;
+    margin-bottom:.9rem;
+  }
+  .eyebrow .suit{font-size:1rem;}
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 28px;
+  }
+
+  /* HERO */
+  .hero{
+    background:radial-gradient(120% 140% at 15% -10%, #3B82F6 0%, var(--felt) 45%, var(--felt-dark) 100%);
+    color:var(--cream);
+    padding:88px 0 76px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero .wrap{position:relative; z-index:2;}
+  .suits-row{
+    font-size:1.4rem;
+    letter-spacing:.5em;
+    color:var(--gold);
+    opacity:.85;
+    margin-bottom:22px;
+  }
+  .hero h1{
+    font-size:clamp(2.2rem, 5vw, 3.2rem);
+    line-height:1.12;
+    letter-spacing:-0.01em;
+    max-width:14ch;
+  }
+  .hero .deck-name{ color:var(--gold); font-style:italic; }
+  .hero p.sub{
+    margin-top:18px;
+    max-width:46ch;
+    font-size:1.08rem;
+    color:rgba(240,244,248,0.82);
+  }
+  .meta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:30px;
+    margin-top:42px;
+    padding-top:28px;
+    border-top:1px solid rgba(240,244,248,0.18);
+  }
+  .meta-item .label{
+    font-size:.7rem;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--gold);
+    margin-bottom:4px;
+  }
+  .meta-item .val{ font-size:.92rem; color:var(--cream); }
+
+  .card-deco{
+    position:absolute;
+    right:-30px;
+    bottom:-30px;
+    display:flex;
+    gap:-10px;
+    z-index:1;
+    opacity:.95;
+  }
+  @media (max-width:760px){ .card-deco{ display:none; } }
+  .playing-card{
+    width:74px; height:104px;
+    background:var(--cream);
+    border-radius:8px;
+    box-shadow:0 14px 30px rgba(0,0,0,0.4);
+    margin-left:-34px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:flex-start;
+    padding:8px;
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:0.9rem;
+  }
+  .playing-card.red{color:var(--crimson);}
+  .playing-card.black{color:#1C1B19;}
+  .playing-card:nth-child(1){transform:rotate(-10deg);}
+  .playing-card:nth-child(2){transform:rotate(-2deg);}
+  .playing-card:nth-child(3){transform:rotate(7deg);}
+  .playing-card:nth-child(4){transform:rotate(15deg);}
+
+  /* SECTIONS */
+  section{ padding:64px 0; }
+  section.alt{ background:var(--cream); }
+  .section-title{
+    font-size:1.7rem;
+    margin-bottom:14px;
+  }
+  .lead{
+    font-size:1.05rem;
+    color:#444;
+    max-width:58ch;
+  }
+  .two-col{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:32px;
+    margin-top:28px;
+  }
+  @media (max-width:640px){ .two-col{grid-template-columns:1fr;} }
+
+  .pill-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:20px 22px;
+  }
+  .pill-card h3{
+    font-size:1.02rem;
+    margin-bottom:8px;
+    color:var(--felt);
+  }
+  .pill-card p{ margin:0; font-size:.94rem; color:#3b3a37; }
+
+  /* TIMELINE */
+  .timeline{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:18px;
+    margin-top:34px;
+  }
+  @media (max-width:700px){ .timeline{grid-template-columns:1fr 1fr;} }
+  .stage{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:22px 18px;
+    position:relative;
+  }
+  .stage .suit-mark{
+    font-size:1.5rem;
+    color:var(--crimson);
+    display:block;
+    margin-bottom:10px;
+  }
+  .stage .suit-mark.black{ color:#1C1B19; }
+  .stage h3{ font-size:.98rem; margin-bottom:4px; }
+  .stage .when{ font-size:.74rem; color:var(--gold); text-transform:uppercase; letter-spacing:.08em; margin-bottom:10px; display:block;}
+  .stage p{ font-size:.86rem; color:#3b3a37; margin:0; }
+
+  /* METHOD ROW */
+  .method-row{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    margin-top:30px;
+  }
+  @media (max-width:700px){ .method-row{grid-template-columns:1fr;} }
+  .method-card{
+    text-align:left;
+    padding:24px;
+    border-radius:12px;
+    background:var(--felt);
+    color:var(--cream);
+  }
+  .method-card .suit-mark{ font-size:1.4rem; color:var(--gold); display:block; margin-bottom:10px;}
+  .method-card h3{ font-size:1rem; margin-bottom:6px; color:var(--cream);}
+  .method-card p{ font-size:.86rem; color:rgba(244,237,224,0.8); margin:0;}
+
+  /* QUOTE */
+  .quote-block{
+    border-left:3px solid var(--crimson);
+    padding:6px 0 6px 22px;
+    margin:30px 0;
+    font-style:italic;
+    font-family:'Fraunces',serif;
+    font-size:1.08rem;
+    color:#2c2b28;
+  }
+
+  /* FINDINGS GRID */
+  .findings-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    margin-top:32px;
+  }
+  @media (max-width:640px){ .findings-grid{grid-template-columns:1fr;} }
+  .finding{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 20px;
+  }
+  .finding .tag{
+    font-size:.7rem;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--crimson);
+    font-weight:600;
+    margin-bottom:6px;
+    display:block;
+  }
+  .finding p{ margin:0; font-size:.92rem; color:#3b3a37;}
+
+  /* IMPACT STAT */
+  .impact-wrap{
+    background:var(--felt-dark);
+    color:var(--cream);
+    border-radius:16px;
+    padding:46px 38px;
+    margin-top:30px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:36px;
+  }
+  .impact-stat{
+    font-family:'Fraunces',serif;
+    font-size:3.6rem;
+    color:var(--gold);
+    line-height:1;
+  }
+  .impact-text{ flex:1; min-width:220px; font-size:.95rem; color:rgba(244,237,224,0.88);}
+  .impact-text strong{ color:var(--cream); }
+
+  ul.tight{ margin:14px 0 0; padding-left:20px; }
+  ul.tight li{ font-size:.94rem; margin-bottom:8px; color:#3b3a37; }
+
+  footer{
+    background:var(--felt-dark);
+    color:rgba(244,237,224,0.6);
+    text-align:center;
+    padding:40px 0;
+    font-size:.84rem;
+  }
+  footer .suits-row{ margin-bottom:10px; font-size:1rem; }
+
+  .note{
+    font-size:.82rem;
+    color:#8a8880;
+    margin-top:28px;
+    border-top:1px dashed var(--line);
+    padding-top:16px;
+  }
+
+  /* Chart section */
+  .chart-card{
+    margin-top:1px;
+    padding:24px;
+    background:var(--paper);
+    border-radius:12px;
+  }
+  .chart-card canvas{
+    max-width:100%;
+  }
+  .chart-title{
+    font-family:'Fraunces', serif;
+    font-size:1rem;
+    font-weight:600;
+    color:var(--crimson);
+    text-align:center;
+    margin:50px 0 0 0;
+    line-height:1.3;
+  }
+  .quote-title {
+    font-family:'Fraunces', serif;
+    color:var(--crimson);
+    text-align:center;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 2.5rem 0 0.35rem;   
+    line-height: 1.2;
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="suits-row">▶ ⏸ ⏺ ⏹</div>
+    <h1>Analyzing <span class="deck-name">Retention</span> — guiding product through listener behavior</h1>
+    <p class="sub">A deep-dive product analysis evaluating Pandora listener engagement, culminating in a new behavioral retention metric.</p>
+    <div class="meta-row">
+      <div class="meta-item"><div class="label">Role</div><div class="val">Product Analyst</div></div>
+      <div class="meta-item"><div class="label">Author</div><div class="val">Daniel King</div></div>
+      <div class="meta-item"><div class="label">Date</div><div class="val">June 2023</div></div>
+    </div>
+  </div>
+  <div class="card-deco">
+    <div class="playing-card red">iOS</div>
+    <div class="playing-card black">Android</div>
+    <div class="playing-card red">Web</div>
+    <div class="playing-card black">Roku</div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="suit">▶</span> Overview</div>
+    <h2 class="section-title">A growing user base with a cyclical engagement problem</h2>
+    <p class="lead">Overall monthly unique listeners were steadily growing (+3.31% over three years), but cyclical engagement patterns suggested that <strong>new users were losing interest over time.</strong></p>
+    <p class="lead">Crucially, retention varied substantially by platform. <strong>iOS and Roku were gaining Monthly Uniques (MUs), while Android and Web were actively losing them.</strong> Because new listener acquisition rates did not predict this retention, the discrepancies pointed to deeper, platform-specific behavioral issues.</p>
+    
+    <div class="two-col">
+      <div class="pill-card">
+        <h3>Project goal</h3>
+        <p>Investigate the underlying causes of listener loss across platforms, evaluate the efficacy of current engagement metrics, and propose data-backed UX recommendations.</p>
+      </div>
+      <div class="pill-card">
+        <h3>Research questions</h3>
+        <p>Why do retention rates vary so widely between platforms? Are we tracking the right metric to predict long-term satisfaction and active product engagement?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><span class="suit">⏸</span> Methodology</div>
+    <h2 class="section-title">A new North Star for retention</h2>
+    <p class="lead">The existing standard—<em>Average listening time per user</em>—was flawed. Extended listening is often a passive behavior (e.g., leaving the app playing in the background), making it difficult to gauge true user satisfaction.</p>
+    
+    <div class="method-row">
+      <div class="method-card">
+        <span class="suit-mark">📊</span>
+        <h3>The New Metric</h3>
+        <p><strong>Average Active Days per Monthly Unique.</strong> Calculated by dividing the sum of daily unique listeners by the number of unique listeners for that month.</p>
+      </div>
+      <div class="method-card">
+        <span class="suit-mark">🧠</span>
+        <h3>The Rationale</h3>
+        <p>It measures purposeful behavior. Choosing to open the app on multiple distinct days indicates active decision-making, satisfaction with the product, and a desire to return.</p>
+      </div>
+      <div class="method-card">
+        <span class="suit-mark">⚖️</span>
+        <h3>The Benefit</h3>
+        <p>It is highly intuitive, easy to calculate, and perfectly comparative—allowing us to cleanly evaluate engagement across entirely different platforms and time points.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="suit">⏺</span> Key Findings</div>
+    <h2 class="section-title">Two distinct listener archetypes</h2>
+    <p class="lead">Applying the "Average Active Days" metric revealed a massive gap between mobile and connected-home/web platforms. Mobile users engaged frequently but for short durations, while web/connected users engaged infrequently but for long durations.</p>
+    
+    <div class="findings-grid">
+      <div class="finding"><span class="tag">Mobile Behavior</span><p>High active days (~10 days/mo) but the shortest average session lengths. Fast, frequent, active use.</p></div>
+      <div class="finding"><span class="tag">Web & Connected</span><p>Low active days (~5 days/mo) but highly extended continuous listening time. Infrequent, passive use.</p></div>
+      <div class="finding"><span class="tag">The Android Problem</span><p>Android users shared the exact same behavioral archetype as iOS, yet Android was losing overall MUs.</p></div>
+      <div class="finding"><span class="tag">YoY Growth</span><p>Between 2019 and 2020, Roku (+17%) and Amazon (+10%) were the only platforms to show growth in listening hours.</p></div>
+    </div>
+
+    <h3 class="chart-title">
+      Average Active Days per Monthly Unique (Dec 2019)
+    </h3>
+    <div class="chart-card">
+      <div style="position: relative; width: 100%; height: 350px;">
+          <canvas id="activeDaysChart" role="img" aria-label="Bar chart showing iOS and Android leading with roughly 10 active days per month, while Roku, Web, and Amazon hover around 5 days."></canvas>
+      </div>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+      <script>
+      new Chart(document.getElementById('activeDaysChart'), {
+        type: 'bar',
+        data: {
+          labels: ['iOS', 'Android', 'Roku', 'All Other', 'Web', 'Amazon'],
+          datasets: [{
+            label: 'Avg Active Days',
+            data: [10.74, 9.89, 5.58, 5.21, 5.05, 4.75],
+            backgroundColor: [
+              'rgba(34, 91, 198, 0.9)', 
+              'rgba(34, 91, 198, 0.7)', 
+              'rgba(56, 189, 248, 0.8)', 
+              'rgba(56, 189, 248, 0.6)', 
+              'rgba(56, 189, 248, 0.4)', 
+              'rgba(56, 189, 248, 0.3)'
+            ],
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 12,
+              grid: { color: 'rgba(30,41,59,0.05)' }
+            },
+            x: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+      </script>
+      <p class="note" style="margin-top:16px; text-align:center;">
+        The gap between mobile (iOS/Android) and other platforms is substantial, suggesting fundamental behavioral differences in how the product is utilized.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><span class="suit">⏹</span> Recommendations & Impact</div>
+    <h2 class="section-title">Strategic UX & Product Priorities</h2>
+    <ul class="tight">
+      <li><strong>Investigate Android UX:</strong> With behavior mirroring iOS but retention dropping, conduct a targeted audit of the Android interface for performance bottlenecks or usability friction.</li>
+      <li><strong>Analyze the Web On-Ramp:</strong> Web is gaining users fastest but also losing them fastest. Determine if it serves as a temporary discovery portal or if UX issues are driving abandonment.</li>
+      <li><strong>Boost Connected Engagement:</strong> Explore push reminders, cross-device continuations, and in-vehicle integrations to increase the active days of Roku/Amazon users.</li>
+      <li><strong>Optimize Ad Delivery:</strong> Adapt monetization models to platform behavior—front-load ads on mobile (frequent/short sessions) and space them out on Web/Roku (infrequent/long sessions).</li>
+    </ul>
+    
+    <div class="impact-wrap">
+      <div class="impact-stat">+17%</div>
+      <div class="impact-text">Year-over-Year growth in average hours listened isolated specifically to Roku users, indicating a <strong>massive untapped market in connected-home listening.</strong></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="suits-row">▶ ⏸ ⏺ ⏹</div>
+  Listener Retention Analysis — Daniel King
+</footer>
+
+</body>
+</html>

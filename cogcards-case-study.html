@@ -221,7 +221,7 @@
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:18px;
-    margin-top:24px;
+    margin-top:32px;
   }
   @media (max-width:640px){ .findings-grid{grid-template-columns:1fr;} }
   .finding{
@@ -295,7 +295,7 @@
   }
   .chart-title{
     font-family:'Fraunces', serif;
-    font-size:1.4rem;
+    font-size:1rem;
     font-weight:600;
     color:var(--crimson);
     text-align:center;
@@ -308,7 +308,7 @@
     text-align:center;
     font-size: 1rem;
     font-weight: 600;
-    margin: 2rem 0 0.35rem;   /* space above, hugs quote below */
+    margin: 2.5rem 0 0.35rem;   /* space above, hugs quote below */
     line-height: 1.2;
   }
 </style>
@@ -338,8 +338,9 @@
   <div class="wrap">
     <div class="eyebrow"><span class="suit">♠</span> Overview</div>
     <h2 class="section-title">A multidimensional assessment in the form of a game</h2>
-    <p class="lead">CogCards is an online, game-based cognitive assessment that measures risk appetite and other key cognitive dimensions to guide hiring decisions and improve investment team performance. Instead of a simple personality test, candidates play a complex, card-based gambling game, resulting in a metric-rich snapshot of their decision-making under stress and uncertainty.</p>
-    <p class="lead">Development involved constructing and validating a novel measurement framework that triangulated behavioral and survey-based data to predict real-world investment performance.</p>
+    <p class="lead">CogCards is an online, game-based cognitive assessment that measures risk appetite and other key cognitive dimensions to <strong>guide hiring decisions and improve investment team performance</strong>. </p>
+    <p class="lead"> Instead of a simple personality test, candidates play a complex, card-based gambling game, resulting in a <strong>metric-rich snapshot of their decision-making</strong> under stress and uncertainty.</p>
+    <p class="lead">Development involved constructing and validating a <strong>novel measurement framework that triangulated behavioral and survey-based data</strong> to predict real-world investment performance.</p>
   </div>
 </section>
 
@@ -407,7 +408,7 @@
       <div class="method-card">
         <span class="suit-mark">♠</span>
         <h3>Behavioral</h3>
-        <p>A card-based gambling game where players try to win as much money as possible — patterns of decision-making as the game unfolds reveal risk-taking and other cognitive abilities.</p>
+        <p>A card-based gambling game where players try to win as much money as possible. Decision-making patterns as the game unfolds reveal risk appetite and other cognitive abilities.</p>
       </div>
       <div class="method-card">
         <span class="suit-mark">♥</span>
@@ -426,20 +427,25 @@
 <section>
   <div class="wrap">
     <div class="eyebrow"><span class="suit">♥</span> Key Findings</div>
-    <h2 class="section-title">Suboptimal Risk, Overconfidence, & Cognitive Biases</h2>
-    <p class="lead">Validating the framework internally (behavioral × self-report) and externally (against portfolio metrics and personality tests) surfaced several surprising patterns: risk patterns were suboptimal, the worst performers overestimated their own performance (and the best performers underestimated theirs), and there were surprisingly-high rates of cognitive biases impacting decision-making.</p>
+    <h2 class="section-title">Suboptimal Risk, Overconfidence, and Cognitive Biases</h2>
+    <p class="lead">Validating the framework internally (behavioral × self-report) and externally (against portfolio metrics) surfaced several surprising patterns: 
+      risk-taking was suboptimal, the worst performers overestimated their own performance 
+      (and the best performers underestimated theirs), 
+      and there were surprisingly-high rates of cognitive biases impacting decision-making.
+    </p>
     <!-- <h3>Gambler's Fallacy found among players</h3> -->
-     <h4 class="quote-title">
-    Evidence for the Gambler's Fallacy Gleaned from Qualitative Insights
-  </h4>
-    <div class="quote-block" style="margin:15px 30px 30px 0;">
-      “If I lost several card draws in a row, I would keep hitting that deck because I knew a win would be coming…”
-    </div>
+    
     <div class="findings-grid">
       <div class="finding"><span class="tag">Behavioral Data</span><p>The current investment team was missing a key range of risk appetite scores entirely.</p></div>
       <div class="finding"><span class="tag">Self-report Data</span><p>An unexpectedly high rate of cognitive biases, including gambler's fallacy.</p></div>
       <div class="finding"><span class="tag">Combined</span><p>Clear evidence of a Dunning-Kruger effect — overconfidence concentrated among weaker performers.</p></div>
       <div class="finding"><span class="tag">Qualitative</span><p>Open-ended responses (analyzed with Claude) surfaced recurring player archetypes.</p></div>
+    </div>
+    <h4 class="quote-title">
+    Evidence for Gambler's Fallacy
+    </h4>
+    <div class="quote-block" style="margin:15px 30px 30px 0;">
+      “If I lost several card draws in a row, I would keep hitting that deck because I knew a win would be coming…”
     </div>
     <!-- Interactive Dunning-Kreuger plot -->
      <h3 class="chart-title">

@@ -302,6 +302,15 @@
     margin:50px 0 0 0;
     line-height:1.3;
   }
+  .quote-title {
+    font-family:'Fraunces', serif;
+    color:var(--crimson);
+    text-align:center;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 2rem 0 0.35rem;   /* space above, hugs quote below */
+    line-height: 1.2;
+  }
 </style>
 </head>
 <body>
@@ -309,7 +318,7 @@
 <header class="hero">
   <div class="wrap">
     <div class="suits-row">♠ ♥ ♦ ♣</div>
-    <h1>Designing <span class="deck-name">CogCards</span> — a behavioral game that reads risk appetite</h1>
+    <h1>Designing <span class="deck-name">CogCards</span> — a behavioral assessment for evaluating new hires</h1>
     <p class="sub">A novel, game-based cognitive assessment built from scratch to guide hiring and improve investment performance, deployed firmwide.</p>
     <div class="meta-row">
       <div class="meta-item"><div class="label">Role</div><div class="val">End-to-end ownership</div></div>
@@ -328,7 +337,7 @@
 <section>
   <div class="wrap">
     <div class="eyebrow"><span class="suit">♠</span> Overview</div>
-    <h2 class="section-title">A multidimensional assessment hiding inside a game</h2>
+    <h2 class="section-title">A multidimensional assessment in the form of a game</h2>
     <p class="lead">CogCards is an online, game-based cognitive assessment that measures risk appetite and other key cognitive dimensions to guide hiring decisions and improve investment team performance. Instead of a simple personality test, candidates play a complex, card-based gambling game, resulting in a metric-rich snapshot of their decision-making under stress and uncertainty.</p>
     <p class="lead">Development involved constructing and validating a novel measurement framework that triangulated behavioral and survey-based data to predict real-world investment performance.</p>
   </div>
@@ -338,11 +347,16 @@
   <div class="wrap">
     <div class="eyebrow"><span class="suit">♥</span> The Problem</div>
     <h2 class="section-title">Risk-taking was a blind spot</h2>
-    <p class="lead">Stakeholders agreed that current risk-taking among the investment team was suboptimal — but had no reliable way to assess risk appetite and other key cognitive dimensions in current or prospective hires. Optimal risk-taking is critical for better investing skill.</p>
+    <p class="lead">
+      Stakeholders at a leading global hedge fund agreed that current risk-taking among the investment team was suboptimal 
+      — but had no reliable way to assess risk appetite and other key cognitive dimensions in current or prospective hires.
+      It's well known in finance that optimal risk-taking is critical to investing skill.</p>
     <div class="two-col">
       <div class="pill-card">
         <h3>Project goal</h3>
-        <p>Build a tool to assess risk appetite and decision-making ability for current and prospective employees that's engaging, valid, and able to deploy at scale.</p>
+        <p>
+          Build a tool to assess risk appetite and decision-making ability for current and prospective employees 
+          that's engaging, valid, and ab bele to deployed at scale.</p>
       </div>
       <div class="pill-card">
         <h3>Research questions</h3>
@@ -412,14 +426,18 @@
 <section>
   <div class="wrap">
     <div class="eyebrow"><span class="suit">♥</span> Key Findings</div>
-    <h2 class="section-title">Overconfidence was hiding in plain sight</h2>
-    <p class="lead">Validating the framework internally (behavioral × self-report) and externally (against portfolio metrics and personality tests) surfaced a consistent pattern: the team's worst performers overestimated their own performance, while the best performers underestimated theirs.</p>
-    <div class="quote-block">
+    <h2 class="section-title">Suboptimal Risk, Overconfidence, & Cognitive Biases</h2>
+    <p class="lead">Validating the framework internally (behavioral × self-report) and externally (against portfolio metrics and personality tests) surfaced several surprising patterns: risk patterns were suboptimal, the worst performers overestimated their own performance (and the best performers underestimated theirs), and there were surprisingly-high rates of cognitive biases impacting decision-making.</p>
+    <!-- <h3>Gambler's Fallacy found among players</h3> -->
+     <h4 class="quote-title">
+    Evidence for the Gambler's Fallacy Gleaned from Qualitative Insights
+  </h4>
+    <div class="quote-block" style="margin:15px 30px 30px 0;">
       “If I lost several card draws in a row, I would keep hitting that deck because I knew a win would be coming…”
     </div>
     <div class="findings-grid">
-      <div class="finding"><span class="tag">Behavioral</span><p>The current investment team was missing a key range of risk appetite scores entirely.</p></div>
-      <div class="finding"><span class="tag">Self-report</span><p>An unexpectedly high rate of cognitive biases, including gambler's fallacy.</p></div>
+      <div class="finding"><span class="tag">Behavioral Data</span><p>The current investment team was missing a key range of risk appetite scores entirely.</p></div>
+      <div class="finding"><span class="tag">Self-report Data</span><p>An unexpectedly high rate of cognitive biases, including gambler's fallacy.</p></div>
       <div class="finding"><span class="tag">Combined</span><p>Clear evidence of a Dunning-Kruger effect — overconfidence concentrated among weaker performers.</p></div>
       <div class="finding"><span class="tag">Qualitative</span><p>Open-ended responses (analyzed with Claude) surfaced recurring player archetypes.</p></div>
     </div>
@@ -550,7 +568,8 @@
       });
       </script>
       <p class="note" style="margin-top:16px;">
-        The relationship between actual and self-perceived performance illustrates a
+        Overconfidence is a widespread and consequential problem in investing.
+        The relationship between actual and self-perceived performance here illustrates a
         classic Dunning–Kruger pattern: lower-performing participants tended to
         overestimate their performance, while higher-performing participants were
         more likely to underestimate it.
@@ -565,12 +584,13 @@
     <div class="eyebrow"><span class="suit">♦</span> Recommendations &amp; Impact</div>
     <h2 class="section-title">From insight to measurable change</h2>
     <ul class="tight">
-      <li>Recommended targeted education for current employees on probabilistic concepts and biases like gambler's fallacy and overconfidence.</li>
       <li>Recommended a target range of risk appetite scores to guide new hires.</li>
+      <li>Recommended targeted education for current employees on probabilistic concepts and biases like gambler's fallacy and overconfidence.</li>
+      <li>Leveraged Claude Code to mitigate use of limited engineering resources and speed up turnaround time by months</li>
     </ul>
     <div class="impact-wrap">
       <div class="impact-stat">+6%</div>
-      <div class="impact-text">Improvement in risk appetite scores, comparing the six months before deployment to the six months after — the first quantitative signal the tool was changing behavior, not just measuring it.</div>
+      <div class="impact-text">Improvement in risk appetite scores, comparing the six months before deployment to the six months after</div>
     </div>
   </div>
 </section>

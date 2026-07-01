@@ -288,8 +288,8 @@
 <header class="hero">
   <div class="wrap">
     <div class="suits-row">♠ ♥ ♦ ♣</div>
-    <h1>Designing <span class="deck-name">CogCards</span> — a card game that reads risk appetite</h1>
-    <p class="sub">A novel, game-based cognitive assessment built to guide hiring and improve investment performance — taken from inception to deployment.</p>
+    <h1>Designing <span class="deck-name">CogCards</span> — a behavioral game that reads risk appetite</h1>
+    <p class="sub">A novel, game-based cognitive assessment built from scratch to guide hiring and improve investment performance, deployed firmwide.</p>
     <div class="meta-row">
       <div class="meta-item"><div class="label">Role</div><div class="val">End-to-end ownership</div></div>
       <div class="meta-item"><div class="label">Stakeholders</div><div class="val">CIO, Human Capital, Portfolio Managers</div></div>
@@ -307,8 +307,9 @@
 <section>
   <div class="wrap">
     <div class="eyebrow"><span class="suit">♠</span> Overview</div>
-    <h2 class="section-title">An assessment hiding inside a game</h2>
-    <p class="lead">CogCards is an online, game-based cognitive assessment that measures risk appetite to guide hiring decisions and improve investment team performance. Instead of a personality test, candidates play a card-based gambling game — their decisions become the data.</p>
+    <h2 class="section-title">A multidimensional assessment hiding inside a game</h2>
+    <p class="lead">CogCards is an online, game-based cognitive assessment that measures risk appetite and other key cognitive dimensions to guide hiring decisions and improve investment team performance. Instead of a simple personality test, candidates play a complex, card-based gambling game, resulting in a metric-rich snapshot of their decision-making under stress and uncertainty.</p>
+    <p class="lead">Development involved constructing and validating a novel measurement framework that triangulated behavioral and survey-based data to predict real-world investment performance.</p>
   </div>
 </section>
 
@@ -316,11 +317,11 @@
   <div class="wrap">
     <div class="eyebrow"><span class="suit">♥</span> The Problem</div>
     <h2 class="section-title">Risk-taking was a blind spot</h2>
-    <p class="lead">Stakeholders agreed that current risk-taking among the investment team was suboptimal — but had no reliable way to assess risk appetite in current or prospective hires. Better risk-taking, the thesis went, meant better investment skill.</p>
+    <p class="lead">Stakeholders agreed that current risk-taking among the investment team was suboptimal — but had no reliable way to assess risk appetite and other key cognitive dimensions in current or prospective hires. Optimal risk-taking is critical for better investing skill.</p>
     <div class="two-col">
       <div class="pill-card">
         <h3>Project goal</h3>
-        <p>Build a tool to assess risk appetite for current and prospective employees that's easy to deploy at scale, and engaging enough that people actually want to take it.</p>
+        <p>Build a tool to assess risk appetite and decision-making ability for current and prospective employees that's engaging, valid, and able to deploy at scale.</p>
       </div>
       <div class="pill-card">
         <h3>Research questions</h3>
@@ -333,13 +334,13 @@
 <section>
   <div class="wrap">
     <div class="eyebrow"><span class="suit">♦</span> Process</div>
-    <h2 class="section-title">Four stages, one suit each</h2>
+    <h2 class="section-title">Four stages of iterative development</h2>
     <div class="timeline">
       <div class="stage">
         <span class="suit-mark black">♠</span>
         <span class="when">Month 1</span>
         <h3>Research &amp; Planning</h3>
-        <p>Competitive analysis found no real precedent — just personality tests and talk-throughs. Behavioral science pointed toward a behavioral task plus a brief self-report survey.</p>
+        <p>Competitive analysis found no real precedent — just personality tests or small scientific instruments. Our objectives pointed toward combining a behavioral task with a brief self-report survey.</p>
       </div>
       <div class="stage">
         <span class="suit-mark red">♥</span>
@@ -351,7 +352,7 @@
         <span class="suit-mark red">♦</span>
         <span class="when">Month 4</span>
         <h3>Deployment</h3>
-        <p>Shipped the final platform (JavaScript + Claude Code) with a Python results dashboard, live with candidates and current analysts.</p>
+        <p>Shipped the final platform (JavaScript + Claude Code) with a custom-built Python-based interactive results dashboard, live with candidates and current analysts.</p>
       </div>
       <div class="stage">
         <span class="suit-mark black">♣</span>
@@ -371,17 +372,17 @@
       <div class="method-card">
         <span class="suit-mark">♠</span>
         <h3>Behavioral</h3>
-        <p>A card-based gambling game where players try to win as much money as possible — decision-making reveals risk-taking directly.</p>
+        <p>A card-based gambling game where players try to win as much money as possible — patterns of decision-making as the game unfolds reveal risk-taking and other cognitive abilities.</p>
       </div>
       <div class="method-card">
         <span class="suit-mark">♥</span>
         <h3>Survey</h3>
-        <p>Closed- and open-ended questions to triangulate against behavioral data and surface qualitative insight.</p>
+        <p>Closed- and open-ended questions to triangulate against behavioral data and surface additional qualitative insights.</p>
       </div>
       <div class="method-card">
         <span class="suit-mark">♦</span>
         <h3>Deliverables</h3>
-        <p>A polished game platform plus a dashboard surfacing player results for hiring teams.</p>
+        <p>A polished cloud-deployed game platform, admin panel, and a dashboard surfacing player results for hiring teams.</p>
       </div>
     </div>
   </div>
@@ -400,6 +401,127 @@
       <div class="finding"><span class="tag">Self-report</span><p>An unexpectedly high rate of cognitive biases, including gambler's fallacy.</p></div>
       <div class="finding"><span class="tag">Combined</span><p>Clear evidence of a Dunning-Kruger effect — overconfidence concentrated among weaker performers.</p></div>
       <div class="finding"><span class="tag">Qualitative</span><p>Open-ended responses (analyzed with Claude) surfaced recurring player archetypes.</p></div>
+    </div>
+    <!-- Interactive Dunning-Kreuger plot -->
+     <div class="chart-card">
+    
+      <div style="padding: 1.5rem 0;">
+        <div style="position: relative; width: 100%; height: 460px;">
+          <canvas id="dkChart" role="img" aria-label="Scatter plot showing Dunning-Kruger effect: perceived performance vs actual performance percentile. Low performers overestimate themselves; high performers underestimate themselves. An AB line shows perfect calibration.">Scatter plot of 50 data points illustrating the Dunning-Kruger effect. Points below the diagonal line indicate underestimation of skill; points above indicate overestimation.</canvas>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 12px; font-size: 13px; color: var(--color-text-secondary); justify-content: center;">
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 10px; height: 10px; border-radius: 50%; background: #378ADD;"></span>
+            Individual respondent
+          </span>
+          <span style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 24px; height: 2px; background: #888780; display: inline-block;"></span>
+            Perfect calibration (AB line)
+          </span>
+        </div>
+      </div>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+      <script>
+      const raw = [
+        {x:2, y:38},{x:5, y:42},{x:7, y:55},{x:8, y:45},{x:10, y:52},
+        {x:12, y:58},{x:14, y:60},{x:15, y:63},{x:17, y:55},{x:18, y:67},
+        {x:20, y:65},{x:22, y:68},{x:24, y:70},{x:25, y:60},{x:27, y:62},
+        {x:29, y:72},{x:31, y:58},{x:33, y:65},{x:35, y:62},{x:37, y:68},
+        {x:38, y:55},{x:40, y:50},{x:42, y:52},{x:44, y:48},{x:45, y:55},
+        {x:47, y:54},{x:49, y:50},{x:51, y:52},{x:53, y:48},{x:55, y:50},
+        {x:56, y:46},{x:58, y:44},{x:60, y:50},{x:62, y:48},{x:64, y:45},
+        {x:65, y:52},{x:67, y:55},{x:69, y:58},{x:71, y:60},{x:73, y:55},
+        {x:75, y:62},{x:77, y:64},{x:79, y:68},{x:80, y:65},{x:82, y:72},
+        {x:84, y:70},{x:87, y:75},{x:90, y:80},{x:94, y:88},{x:97, y:92}
+      ];
+
+      const abLine = [{x:0,y:0},{x:100,y:100}];
+
+      new Chart(document.getElementById('dkChart'), {
+        type: 'scatter',
+        data: {
+          datasets: [
+            {
+              label: 'Respondents',
+              data: raw,
+              backgroundColor: 'rgba(55, 138, 221, 0.55)',
+              borderColor: 'rgba(55, 138, 221, 0.85)',
+              borderWidth: 1.2,
+              pointRadius: 6,
+              pointHoverRadius: 8,
+              type: 'scatter'
+            },
+            {
+              label: 'AB line (perfect calibration)',
+              data: abLine,
+              type: 'line',
+              borderColor: '#888780',
+              borderWidth: 1.5,
+              borderDash: [6, 4],
+              pointRadius: 0,
+              fill: false,
+              tension: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          layout: { padding: { top: 10, right: 10, bottom: 4, left: 4 } },
+          scales: {
+            x: {
+              type: 'linear',
+              min: 0,
+              max: 100,
+              title: {
+                display: true,
+                text: 'Actual Performance (Percentile)',
+                font: { size: 13, weight: '500' },
+                color: '#5F5E5A',
+                padding: { top: 10 }
+              },
+              ticks: {
+                stepSize: 10,
+                font: { size: 12 },
+                color: '#888780',
+                callback: v => v
+              },
+              grid: { color: 'rgba(136,135,128,0.15)' },
+              border: { color: 'rgba(136,135,128,0.3)' }
+            },
+            y: {
+              type: 'linear',
+              min: 0,
+              max: 100,
+              title: {
+                display: true,
+                text: 'Perceived Performance (Percentile)',
+                font: { size: 13, weight: '500' },
+                color: '#5F5E5A',
+                padding: { bottom: 10 }
+              },
+              ticks: {
+                stepSize: 10,
+                font: { size: 12 },
+                color: '#888780',
+                callback: v => v
+              },
+              grid: { color: 'rgba(136,135,128,0.15)' },
+              border: { color: 'rgba(136,135,128,0.3)' }
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => `Actual: ${ctx.parsed.x}th · Perceived: ${ctx.parsed.y}th`
+              }
+            }
+          }
+        }
+      });
+      </script>
+      <!-- Paste everything from dunning_krueger_scatter.html here -->
     </div>
   </div>
 </section>

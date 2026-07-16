@@ -74,12 +74,12 @@
             <li><a href="#" data-filter=".analytics">People Analytics</a></li>
             <li><a href="#" data-filter=".dataviz">Data Visualization</a></li>
             <li><a href="#" data-filter=".NLP">NLP</a></li>
-            <!-- <li><a href="#" data-filter=".publications">Publications</a></li> -->
             <li><a href="#" data-filter=".experiment">Experimental Design</a></li>
-            <!-- <li><a href="#" data-filter=".adipiscing">Adipiscing Elit</a></li> -->
           </ol>
         </li>
       </ul>
+      <!-- Blurb container -->
+      <p id="portfolio-blurb" style="margin: 35px 0 0; font-size: 16px; max-width: 800px;">This portfolio spans the toolkit I bring to people analytics: designing experiments and surveys, building statistical models, visualizing results, and applying NLP to unstructured data. Each project below reflects a piece of that end-to-end research process, from hypothesis to actionable insight.</p>
     </div>
     <div class="row">
       <div class="portfolio-items">
@@ -248,5 +248,30 @@
 <script type="text/javascript" src="js/jqBootstrapValidation.js"></script> 
 <script type="text/javascript" src="js/contact_me.js"></script> 
 <script type="text/javascript" src="js/main.js"></script>
+<!-- Script handling blurb for each portfolio item -->
+<script type="text/javascript">
+  // Portfolio filter blurbs
+  (function () {
+    var blurbs = {
+      "*": "This portfolio spans the toolkit I bring to people analytics: designing experiments and surveys, building statistical models, visualizing results, and applying NLP to unstructured data. Each project below reflects a piece of that end-to-end research process, from hypothesis to actionable insight.",
+      ".analytics": "These projects apply behavioral science and statistical modeling directly to workforce and hiring decisions, the core of people analytics work. They reflect experience translating candidate and employee behavior data into metrics and platforms that inform real business decisions.",
+      ".dataviz": "Communicating findings clearly matters as much as generating them. These projects focus on turning complex quantitative results into visualizations that make patterns immediately legible to non-technical stakeholders.",
+      ".NLP": "Natural language processing work from my academic research, applying computational methods to analyze how language use reflects and predicts underlying cognitive and behavioral patterns.",
+      ".experiment": "Rigorous experimental design is the foundation of causal inference. These projects, spanning published research and applied studies, reflect hypothesis-driven research from design through statistical analysis."
+    };
+
+    var blurbEl = document.getElementById("portfolio-blurb");
+    var filterLinks = document.querySelectorAll(".cat a[data-filter]");
+
+    if (blurbEl && filterLinks.length) {
+      filterLinks.forEach(function (link) {
+        link.addEventListener("click", function () {
+          var filter = link.getAttribute("data-filter");
+          blurbEl.textContent = blurbs[filter] || blurbs["*"];
+        });
+      });
+    }
+  })();
+</script>
 </body>
 </html>

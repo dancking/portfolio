@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nobel Gender Gap — Case Study</title>
+<meta name="description" content="An exploratory analysis of every Nobel laureate from 1901 to 2016: how large the gender gap is, where it is largest, whether it is closing, and where laureates were born.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#3B2448;
+    --night-dark:#26162F;
+    --cream:#F4F0EA;
+    --paper:#FDFBF8;
+    --ink:#1E1A21;
+    --muted:#4A4450;
+    --accent:#86479C;
+    --gold:#E2B458;
+    --line: rgba(30,26,33,0.12);
+    /* gender colors: match the ggplot figures */
+    --women:#F8766D; --men:#619CFF;
+    /* year shading: match the "% male winners" figure */
+    --allmale:#E8A9B5; --somewomen:#A9E3BC;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-size:16px;
+    line-height:1.6;
+  }
+  h1,h2,h3{ font-family:'Fraunces',serif; font-weight:600; margin:0; }
+  strong{ font-weight:600; }
+  a{ color:var(--accent); }
+  .eyebrow{
+    display:flex; align-items:center; gap:.5em;
+    font-size:.78rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--accent); font-weight:600; margin-bottom:.9rem;
+  }
+  .eyebrow .glyph{ font-size:.95rem; display:inline-flex; }
+  .wrap{ max-width:760px; margin:0 auto; padding:0 28px; }
+  .wide{ max-width:1240px; margin:0 auto; padding:0 28px; }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:radial-gradient(120% 140% at 15% -10%, #5E3C72 0%, var(--night) 45%, var(--night-dark) 100%);
+    color:var(--cream);
+    padding:88px 0 76px;
+    position:relative; overflow:hidden;
+  }
+  .hero .wrap{ position:relative; z-index:2; }
+  .ic{ width:1em; height:1em; fill:currentColor; display:inline-block; vertical-align:-0.12em; flex:none; }
+  .ic.flip{ transform:scaleX(-1); }
+  .glyph-row{ display:flex; align-items:center; gap:.45em; font-size:1.3rem; color:var(--gold); opacity:.9; margin-bottom:22px; }
+  .glyph-row .yrs{ font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; margin-left:.8em; color:rgba(244,240,234,.6); }
+  .hero h1{
+    font-size:clamp(2.2rem, 5vw, 3.2rem);
+    line-height:1.12; letter-spacing:-0.01em; max-width:15ch;
+  }
+  .hero .hl{ color:var(--gold); font-style:italic; }
+  .hero p.sub{ margin-top:18px; max-width:50ch; font-size:1.08rem; color:rgba(244,240,234,0.84); }
+  .meta-row{
+    display:flex; flex-wrap:wrap; gap:18px 34px;
+    margin-top:42px; padding-top:28px;
+    border-top:1px solid rgba(244,240,234,0.18);
+  }
+  .meta-item .label{ font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:4px; }
+  .meta-item .val{ font-size:.92rem; color:var(--cream); }
+
+  /* waffle decoration: 100 squares, 5 of them women (47 of 881 laureates = 5.3%) */
+  .waffle{
+    position:absolute; right:64px; bottom:64px; z-index:1;
+    display:grid; grid-template-columns:repeat(10, 16px); gap:5px;
+  }
+  .waffle span{ width:16px; height:16px; border-radius:3px; background:var(--men); opacity:.38; }
+  .waffle span.w{
+    background:var(--women); opacity:1;
+    animation:glow 2.4s ease-in-out infinite alternate; animation-delay:var(--d);
+  }
+  .waffle-cap{
+    position:absolute; right:64px; bottom:34px; z-index:1; white-space:nowrap; text-align:right;
+    font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:rgba(244,240,234,.55);
+  }
+  .waffle-cap b{ color:var(--women); font-weight:600; }
+  @keyframes glow{ from{ opacity:.7; } to{ opacity:1; } }
+  @media (max-width:1100px){ .waffle, .waffle-cap{ display:none; } }
+
+  /* ---------- SECTIONS ---------- */
+  section{ padding:64px 0; }
+  section.alt{ background:var(--cream); }
+  .section-title{ font-size:1.7rem; margin-bottom:14px; line-height:1.25; }
+  .lead{ font-size:1.05rem; color:var(--muted); max-width:60ch; }
+  .lead + .lead{ margin-top:-.2rem; }
+
+  /* at-a-glance */
+  .glance{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:30px; }
+  @media (max-width:640px){ .glance{ grid-template-columns:1fr; } }
+  .g-card{
+    background:var(--paper); border:1px solid var(--line); border-radius:12px;
+    padding:22px 22px 20px; position:relative; overflow:hidden;
+  }
+  .g-card::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--c, var(--accent));
+  }
+  .g-num{
+    font-family:'Fraunces',serif; font-size:2.1rem; line-height:1; color:var(--night);
+    margin-bottom:10px; letter-spacing:-0.01em;
+  }
+  .g-num small{ font-size:1rem; color:var(--muted); font-family:'Inter',sans-serif; font-weight:500; }
+  .g-card p{ margin:0; font-size:.92rem; color:#3d3842; }
+
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-top:28px; }
+  @media (max-width:640px){ .two-col{ grid-template-columns:1fr; } }
+  .pill-card{ background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:20px 22px; }
+  .pill-card h3{ font-size:1.02rem; margin-bottom:8px; color:var(--night); }
+  .pill-card p, .pill-card li{ font-size:.94rem; color:#3d3842; }
+  .pill-card p{ margin:0; }
+  .pill-card ol{ margin:0; padding-left:18px; }
+  .pill-card li{ margin-bottom:6px; }
+
+  .data-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+  .chip{
+    font-size:.78rem; padding:4px 10px; border-radius:99px;
+    background:var(--paper); border:1px solid var(--line); color:var(--muted);
+  }
+  .chip.dot::before{
+    content:""; display:inline-block; width:8px; height:8px; border-radius:50%;
+    background:var(--c); margin-right:6px; vertical-align:1px;
+  }
+  .chip.warn{ border-style:dashed; }
+
+  /* method cards */
+  .method-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:30px; }
+  @media (max-width:700px){ .method-row{ grid-template-columns:1fr; } }
+  .method-card{ padding:24px; border-radius:12px; background:var(--night); color:var(--cream); }
+  .method-card .glyph{ font-size:1.4rem; color:var(--gold); display:block; margin-bottom:10px; }
+  .method-card h3{ font-size:1rem; margin-bottom:6px; color:var(--cream); }
+  .method-card p{ font-size:.86rem; color:rgba(244,240,234,0.8); margin:0; }
+
+  .how-to{
+    display:flex; gap:12px; align-items:flex-start;
+    margin-top:30px; padding:14px 18px; border-radius:10px;
+    background:rgba(134,71,156,.07); border:1px dashed rgba(134,71,156,.35);
+    font-size:.9rem; color:var(--muted);
+  }
+  .how-to .ico{ font-size:1.1rem; color:var(--accent); line-height:1.4; }
+
+  /* ---------- SCROLLYTELLING ---------- */
+  .chapter-head{ margin-bottom:34px; }
+  .scrolly{
+    display:grid;
+    grid-template-columns:minmax(260px, 330px) 1fr;
+    grid-template-areas:"steps graphic";
+    gap:48px;
+    position:relative;
+  }
+  .scrolly-graphic{ grid-area:graphic; position:sticky; top:11vh; align-self:start; }
+  .scrolly-steps{ grid-area:steps; padding:4vh 0 26vh; }
+
+  .fig-head{
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    margin-bottom:10px;
+  }
+  .fig-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1rem; color:var(--night); }
+  .stage{
+    position:relative;
+    aspect-ratio:var(--ar);
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:0 10px 30px rgba(59,36,72,.08);
+    cursor:zoom-in;
+    overflow:hidden;
+  }
+  .scrolly-graphic.compact .fig-head,
+  .scrolly-graphic.compact .stage{ max-width:600px; margin-left:auto; margin-right:auto; }
+  .stage .frame{
+    position:absolute; inset:12px;
+    width:calc(100% - 24px); height:calc(100% - 24px);
+    object-fit:contain;
+    opacity:0;
+    transition:opacity .7s ease;
+  }
+  .stage .frame.on{ opacity:1; }
+  .enlarge{
+    position:absolute; right:10px; bottom:10px;
+    font-size:.7rem; padding:3px 9px; border-radius:99px;
+    background:rgba(59,36,72,.72); color:#fff; letter-spacing:.04em;
+    opacity:0; transition:opacity .2s;
+    pointer-events:none;
+  }
+  .stage:hover .enlarge, .stage:focus-visible .enlarge{ opacity:1; }
+  .stage:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+
+  .dots{ display:flex; gap:8px; justify-content:center; margin-top:14px; }
+  .dots button{
+    width:28px; height:6px; border-radius:99px; border:0; padding:0;
+    background:rgba(30,26,33,.14); cursor:pointer;
+    transition:background .3s, width .3s;
+  }
+  .dots button.on{ background:var(--accent); width:44px; }
+  .dots button:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+
+  .step{ min-height:72vh; display:flex; flex-direction:column; justify-content:center; }
+  .step-card{
+    border-left:3px solid var(--line);
+    padding:6px 0 6px 20px;
+    opacity:.35;
+    transition:opacity .45s, border-color .45s;
+  }
+  .step.active .step-card{ opacity:1; border-color:var(--accent); }
+  .step .num{
+    font-size:.7rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--accent); font-weight:600; display:block; margin-bottom:6px;
+  }
+  .step h3{ font-size:1.18rem; line-height:1.3; margin-bottom:8px; color:var(--night); }
+  .step p{ margin:0; font-size:.95rem; color:var(--muted); }
+  .step p + p{ margin-top:8px; }
+  .stat-pill{
+    display:inline-block; margin-top:12px;
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.05rem;
+    padding:4px 12px; border-radius:8px;
+    background:rgba(226,180,88,.2); color:#6b4a00;
+  }
+  .pl{ white-space:nowrap; }
+  .sw{ display:inline-block; width:.62em; height:.62em; border-radius:50%; background:var(--c); margin:0 .15em 0 .05em; vertical-align:.05em; }
+  .sw.sq{ border-radius:2px; }
+
+  @media (max-width:900px){
+    .scrolly{ display:block; }
+    .scrolly-graphic{
+      position:sticky; top:0; z-index:3;
+      background:var(--paper);
+      padding:10px 0 8px;
+      box-shadow:0 12px 14px -12px rgba(59,36,72,.25);
+    }
+    section.alt .scrolly-graphic{ background:var(--cream); }
+    .scrolly-graphic.compact .stage{ max-width:340px; }
+    .scrolly-steps{ padding:6vh 0 30vh; position:relative; z-index:1; }
+    .step{ min-height:62vh; justify-content:flex-start; padding-top:4vh; }
+    .step-card{
+      background:var(--paper); border:1px solid var(--line); border-left:3px solid var(--line);
+      border-radius:10px; padding:16px 18px; opacity:.55;
+    }
+    .fig-title{ font-size:.9rem; }
+    .dots{ margin-top:8px; }
+  }
+
+  /* ---------- MODEL ---------- */
+  .formula-card{
+    margin-top:30px; background:var(--night); color:var(--cream);
+    border-radius:16px; padding:34px 34px 30px;
+  }
+  .formula{
+    display:flex; align-items:center; flex-wrap:wrap; gap:14px 18px;
+    font-family:'Fraunces',serif; font-size:1.25rem;
+  }
+  .formula .name{ color:var(--gold); font-weight:600; }
+  .formula .tilde{ font-size:1.5rem; line-height:1; }
+  .formula-plain{ margin-top:14px; font-size:.92rem; color:rgba(244,240,234,.75); }
+  .results{
+    margin-top:24px; padding-top:22px; border-top:1px solid rgba(244,240,234,.16);
+    display:grid; grid-template-columns:1fr 1fr; gap:22px;
+  }
+  @media (max-width:560px){ .results{ grid-template-columns:1fr; } }
+  .results .label{ font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:8px; }
+  .results .p{ font-family:'Fraunces',serif; font-size:2.4rem; color:var(--gold); line-height:1; font-variant-numeric:tabular-nums; }
+  .results .p small{ font-size:1rem; color:rgba(244,240,234,.75); font-family:'Inter',sans-serif; }
+  .results .b{ margin-top:8px; font-size:.88rem; color:rgba(244,240,234,.8); }
+  .results .verdict{ display:inline-block; margin-top:10px; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; padding:3px 10px; border-radius:99px; border:1px solid rgba(244,240,234,.3); color:var(--cream); }
+
+  /* ---------- NEXT QUESTIONS ---------- */
+  .recs{ margin-top:30px; display:grid; gap:16px; }
+  .rec{
+    display:grid; grid-template-columns:1.05fr 1.15fr 1.1fr; gap:0;
+    border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--paper);
+  }
+  .rec > div{ padding:18px 20px; }
+  .rec > div + div{ border-left:1px solid var(--line); }
+  .rec .k{ display:block; font-size:.66rem; text-transform:uppercase; letter-spacing:.1em; font-weight:600; color:var(--accent); margin-bottom:6px; }
+  .rec .finding{ background:rgba(59,36,72,.035); }
+  .rec .finding b{ font-family:'Fraunces',serif; font-weight:600; font-size:1rem; color:var(--night); display:block; line-height:1.3; }
+  .rec p{ margin:0; font-size:.88rem; color:#3d3842; }
+  @media (max-width:760px){
+    .rec{ grid-template-columns:1fr; }
+    .rec > div + div{ border-left:0; border-top:1px solid var(--line); }
+  }
+
+  ul.tight{ margin:14px 0 0; padding-left:20px; }
+  ul.tight li{ font-size:.96rem; margin-bottom:10px; color:#3d3842; max-width:62ch; }
+  .note{
+    font-size:.82rem; color:#8a8590; margin-top:28px;
+    border-top:1px dashed var(--line); padding-top:16px;
+  }
+  .note a{ color:inherit; }
+
+  footer{
+    background:var(--night-dark); color:rgba(244,240,234,0.6);
+    text-align:center; padding:40px 0; font-size:.84rem;
+  }
+  footer .glyph-row{ margin-bottom:12px; font-size:1rem; justify-content:center; }
+  footer a{ color:var(--gold); text-decoration:none; }
+  footer a:hover{ text-decoration:underline; }
+
+  /* ---------- LIGHTBOX ---------- */
+  .lightbox{
+    position:fixed; inset:0; z-index:50;
+    background:rgba(38,22,47,.9);
+    display:none; align-items:center; justify-content:center; padding:4vh 3vw;
+    cursor:zoom-out;
+  }
+  .lightbox.open{ display:flex; }
+  .lightbox img{ max-width:100%; max-height:100%; background:#fff; border-radius:10px; padding:10px; }
+  .lightbox .close{
+    position:absolute; top:14px; right:18px; color:#fff; font-size:.8rem; letter-spacing:.08em; text-transform:uppercase;
+    background:none; border:1px solid rgba(255,255,255,.4); border-radius:99px; padding:5px 12px; cursor:pointer;
+  }
+
+  /* entrance reveal */
+  .reveal{ opacity:0; transform:translateY(14px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.in{ opacity:1; transform:none; }
+  .no-js .reveal{ opacity:1; transform:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    .waffle span.w{ animation:none; }
+    .stage .frame, .step-card, .reveal{ transition:none; }
+    .reveal{ opacity:1; transform:none; }
+  }
+</style>
+</head>
+<body class="no-js">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-medal" viewBox="0 0 24 24"><path d="M6.5 2h4.2l2.3 6.2H8.8zM17.5 2h-4.2l-2.3 6.2h4.2z"/><circle cx="12" cy="15" r="6.5"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M19.5 3.5C11 3.5 5 8 5 14.5c0 1.6.4 3 1 4.2L4 21l1.2 1 2-2.2c1.3.9 2.9 1.4 4.6 1.4 6.3 0 8.7-7 7.7-17.7zM8.2 18.6c1.8-4.6 4.8-8.2 8.3-10.6-3 3-5.4 6.6-6.9 11.4z"/></symbol>
+  <symbol id="i-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 24 24"><rect x="4" y="12" width="4" height="8" rx="1"/><rect x="10" y="7" width="4" height="13" rx="1"/><rect x="16" y="3.5" width="4" height="16.5" rx="1"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="M3 17.2l5.3-5.3 3.8 3.6L18.6 9H15V6.5h8v8h-2.5v-3.7l-8.4 8.3-3.8-3.6-3.6 3.6z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2.5a9.5 9.5 0 1 1 0 19 9.5 9.5 0 0 1 0-19zm-1.2 2.1A7.5 7.5 0 0 0 4.6 11h3.2c.1-2.4.9-4.6 3-6.4zm2.4 0c2.1 1.8 2.9 4 3 6.4h3.2a7.5 7.5 0 0 0-6.2-6.4zM14.2 11c-.1-2.2-.9-4.1-2.2-5.4-1.3 1.3-2.1 3.2-2.2 5.4zm-4.4 2c.1 2.2.9 4.1 2.2 5.4 1.3-1.3 2.1-3.2 2.2-5.4zm-2 0H4.6a7.5 7.5 0 0 0 6.2 6.4c-2.1-1.8-2.9-4-3-6.4zm8.4 0c-.1 2.4-.9 4.6-3 6.4a7.5 7.5 0 0 0 6.2-6.4z"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 2.5h6V5h-1v4.6l5.6 9.3c.8 1.4-.2 3.1-1.8 3.1H6.2c-1.6 0-2.6-1.7-1.8-3.1L10 9.6V5H9zm-.9 13.5h7.8l-2.1-3.5h-3.6z"/></symbol>
+</svg>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="wrap">
+    <div class="glyph-row" aria-hidden="true"><svg class="ic"><use href="#i-leaf"/></svg><svg class="ic"><use href="#i-medal"/></svg><svg class="ic flip"><use href="#i-leaf"/></svg><span class="yrs">1901 – 2016</span></div>
+    <h1>Measuring the Nobel Prize's <span class="hl">gender gap</span></h1>
+    <p class="sub">Of 881 Nobel laureates from 1901 to 2016, 47 were women. I broke that gap down by prize category, followed it across 113 award years and tested whether a recent uptick in female laureates is real or driven by a single unusual year.</p>
+    <div class="meta-row">
+      <div class="meta-item"><div class="label">Role</div><div class="val">Solo, end to end</div></div>
+      <div class="meta-item"><div class="label">Context</div><div class="val">Exploratory data-viz project</div></div>
+      <div class="meta-item"><div class="label">Data</div><div class="val">881 laureates · 6 categories · 1901–2016</div></div>
+      <div class="meta-item"><div class="label">Tools</div><div class="val">R · ggplot2 · R Markdown</div></div>
+    </div>
+  </div>
+  <div class="waffle" aria-hidden="true" id="waffle"></div>
+  <div class="waffle-cap" aria-hidden="true">1 square ≈ 1% of laureates · <b>women</b></div>
+</header>
+
+<!-- ================= KEY STRENGTHS ================= -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-medal"/></svg></span> Key Strengths</div>
+    <h2 class="section-title">What this case study shows about how I work</h2>
+    <ul class="tight">
+      <li><strong>I look past the headline number.</strong> Splitting the gap by category showed that the categories with narrower gaps simply awarded fewer prizes. Women weren't winning more of them.</li>
+      <li><strong>I check whether a trend holds up before I report it.</strong> A possible recent rise in female laureates got a formal test, then a second test without the one unusual year that might have been driving it.</li>
+      <li><strong>I design charts that make a pattern obvious.</strong> Shading every award year as all-male or not turns 113 data points into a picture that needs no explanation.</li>
+    </ul>
+    <p class="note">An exploratory analysis of a public dataset (<a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-05-14" target="_blank" rel="noopener">TidyTuesday Nobel laureates</a>). All figures are my originals, built in R.</p>
+  </div>
+</section>
+
+<!-- ================= AT A GLANCE ================= -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-bars"/></svg></span> At a glance</div>
+    <h2 class="section-title">A vast gap that has barely moved</h2>
+    <p class="lead">Women are rare among Nobel laureates in every category and in almost every year. There may be a small shift in the most recent years, but it doesn't survive a basic robustness check.</p>
+    <div class="glance">
+      <div class="g-card reveal" style="--c:var(--women)">
+        <div class="g-num">5%</div>
+        <p><strong>Women's share of all laureates, 1901–2016:</strong> 47 women and 834 men.</p>
+      </div>
+      <div class="g-card reveal" style="--c:var(--allmale)">
+        <div class="g-num">77 <small>of 113 years</small></div>
+        <p><strong>Every laureate was a man in 68% of award years.</strong> Only 36 years had at least one female laureate.</p>
+      </div>
+      <div class="g-card reveal" style="--c:var(--gold)">
+        <div class="g-num">16 <small>years</small></div>
+        <p><strong>The longest gap between female laureates</strong>, from 1947 to 1963.</p>
+      </div>
+      <div class="g-card reveal" style="--c:var(--night)">
+        <div class="g-num">p = .06</div>
+        <p><strong>The recent uptick is only marginally significant,</strong> and not at all once the outlier year 2009 is removed (p = .17).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= THE BRIEF ================= -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-leaf"/></svg></span> The question</div>
+    <h2 class="section-title">How big is the gap, and is it closing?</h2>
+    <p class="lead">The first Nobel Prizes were awarded in 1901, 19 years before women in the US had the right to vote. I wanted to measure how large the gender gap among laureates is, where it is largest, and whether there is any sign that it is shrinking.</p>
+    <div class="data-chips">
+      <span class="chip">Prize year</span>
+      <span class="chip">Category</span>
+      <span class="chip">Laureate gender</span>
+      <span class="chip">Birth country</span>
+      <span class="chip warn">No prizes 1940–1942</span>
+    </div>
+    <div class="data-chips">
+      <span class="chip dot" style="--c:var(--women)">Women</span>
+      <span class="chip dot" style="--c:var(--men)">Men</span>
+    </div>
+    <div class="two-col">
+      <div class="pill-card">
+        <h3>The data</h3>
+        <p>Every Chemistry, Physics, Medicine, Economics, Literature and Peace laureate from 1901 through 2016. No prizes were awarded from 1940 to 1942, during the Nazi occupation of Norway, which leaves 113 award years.</p>
+      </div>
+      <div class="pill-card">
+        <h3>Research questions</h3>
+        <ol>
+          <li>How large is the gap, overall and by category?</li>
+          <li>Has it changed over time?</li>
+          <li>Is any recent change statistically meaningful?</li>
+          <li>Where were male and female laureates born?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= APPROACH ================= -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-flask"/></svg></span> Approach</div>
+    <h2 class="section-title">Count it, follow it over time, then test it</h2>
+    <div class="method-row">
+      <div class="method-card">
+        <span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-bars"/></svg></span>
+        <h3>Count it</h3>
+        <p>Totals by gender, then by category in a dumbbell chart, where the length of each line is the size of the gap.</p>
+      </div>
+      <div class="method-card">
+        <span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-trend"/></svg></span>
+        <h3>Follow it over time</h3>
+        <p>Yearly counts for women and men, the share of each year's prizes that went to men, and a smoothed trend line.</p>
+      </div>
+      <div class="method-card">
+        <span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-flask"/></svg></span>
+        <h3>Test it</h3>
+        <p>A linear model of the yearly share, refit without the most unusual year to see whether the result still holds.</p>
+      </div>
+    </div>
+    <div class="how-to">
+      <span class="ico">↓</span>
+      <span>I show data the way I'd present it to a room: one layer at a time. As you scroll, each chart below builds step by step. Click or tap any chart to see it full size.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FINDING 1 ================= -->
+<section class="alt">
+  <div class="wrap chapter-head">
+    <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-bars"/></svg></span> Finding 1 · Prize category</div>
+    <h2 class="section-title">Narrower gaps don't mean more women</h2>
+  </div>
+  <div class="wide">
+    <div class="scrolly">
+      <div class="scrolly-graphic compact">
+        <div class="fig-head"><span class="fig-title">Laureates by gender, 1901–2016</span></div>
+        <div class="stage" style="--ar:1350/1230" tabindex="0" role="button" aria-label="Enlarge current chart">
+          <img class="frame on" src="Plots/Nobel/overall.png" alt="Bar chart of total prizes by gender, 1901 to 2016: 47 women and 834 men.">
+          <img class="frame" src="Plots/Nobel/cat_diffs.png" alt="Dumbbell chart of the number of prizes to women and men in each category. Men far outnumber women in every category; the gaps are longest in Physics, Medicine and Chemistry, where men have about 170 to 200 prizes each, and shorter in Literature, Economics and Peace, where men have under 100 each. Women's counts stay low in all six.">
+          <span class="enlarge">⤢ Enlarge</span>
+        </div>
+        <div class="dots"></div>
+      </div>
+      <div class="scrolly-steps">
+        <div class="step" data-frame="0"><div class="step-card">
+          <span class="num">Build 1</span>
+          <h3>47 women, 834 men</h3>
+          <p>Across 113 award years, women made up just 5% of all Nobel laureates.</p>
+          <span class="stat-pill">5% women</span>
+        </div></div>
+        <div class="step" data-frame="1"><div class="step-card">
+          <span class="num">Build 2</span>
+          <h3>Every category has a gap</h3>
+          <p>Each row shows the number of <span class="pl"><span class="sw" style="--c:var(--women)"></span>women</span> and <span class="pl"><span class="sw" style="--c:var(--men)"></span>men</span> laureates in one category. The line between them is the size of the gap.</p>
+        </div></div>
+        <div class="step" data-frame="1"><div class="step-card">
+          <span class="num">Build 3</span>
+          <h3>Shorter lines, same number of women</h3>
+          <p>The gap looks smaller in Peace, Economics and Literature than in Chemistry, Medicine and Physics. But the <span class="pl"><span class="sw" style="--c:var(--women)"></span>women's</span> dots barely move from row to row. What changes is the total: those categories have awarded fewer prizes overall. Men have won fewer of them, not women more.</p>
+          <p>Economics, for one, wasn't awarded until 1969.</p>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FINDING 2 ================= -->
+<section>
+  <div class="wrap chapter-head">
+    <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-trend"/></svg></span> Finding 2 · Awards over time</div>
+    <h2 class="section-title">A century of growth, almost all of it for men</h2>
+  </div>
+  <div class="wide">
+    <div class="scrolly">
+      <div class="scrolly-graphic">
+        <div class="fig-head"><span class="fig-title">Nobel Prizes by year, 1901–2016</span></div>
+        <div class="stage" style="--ar:2715/1500" tabindex="0" role="button" aria-label="Enlarge current chart">
+          <img class="frame on" src="Plots/Nobel/by_year.png" alt="Line chart of prizes awarded each year to men and to women, 1901 to 2016. Men's prizes rise from about 5 to 7 a year early in the century to about 10 or more after the 1970s. Women's prizes stay at 0 to 1 in most years, with a record of 5 in 2009. The first female laureate, Marie Curie, is marked in 1903.">
+          <img class="frame" src="Plots/Nobel/prop.png" alt="Percentage of each year's prizes awarded to men, 1901 to 2016. Most years sit at 100% and are shaded red for no women laureates; years with at least one woman are shaded green and dip to between about 60% and 90%. There is a long red stretch from the late 1940s to the early 1960s.">
+          <img class="frame" src="Plots/Nobel/prop_smoothed.png" alt="The same yearly percentages in grey with a smoothed blue trend line and confidence band. The line stays near 95 to 97% for most of the century and slopes down to below 90% in the final years of the data.">
+          <span class="enlarge">⤢ Enlarge</span>
+        </div>
+        <div class="dots"></div>
+      </div>
+      <div class="scrolly-steps">
+        <div class="step" data-frame="0"><div class="step-card">
+          <span class="num">Build 1</span>
+          <h3>Prizes to men have climbed</h3>
+          <p>The number of <span class="pl"><span class="sw" style="--c:var(--men)"></span>men</span> honored each year rose steadily, from around 5 to 7 in the early 1900s to around 10 or more since the 1970s.</p>
+        </div></div>
+        <div class="step" data-frame="0"><div class="step-card">
+          <span class="num">Build 2</span>
+          <h3>Prizes to women have stayed near the floor</h3>
+          <p>Marie Curie became the first female laureate in 1903. Since then, the number of <span class="pl"><span class="sw" style="--c:var(--women)"></span>women</span> honored each year has been mostly flat, with a possible uptick in roughly the last 15 years. The record is 5, in 2009.</p>
+        </div></div>
+        <div class="step" data-frame="1"><div class="step-card">
+          <span class="num">Build 3</span>
+          <h3>In most years, every laureate was a man</h3>
+          <p>Each point is the share of that year's prizes that went to men. <span class="pl"><span class="sw sq" style="--c:var(--allmale)"></span>Red</span> years had no female laureates; <span class="pl"><span class="sw sq" style="--c:var(--somewomen)"></span>green</span> years had at least one.</p>
+          <p>Only 36 of 113 years had a female laureate. In the other 77, every prize went to a man. The longest gap between female laureates was 16 years, from 1947 to 1963.</p>
+          <span class="stat-pill">77 of 113 years all-male</span>
+        </div></div>
+        <div class="step" data-frame="2"><div class="step-card">
+          <span class="num">Build 4</span>
+          <h3>A possible turn at the end</h3>
+          <p>A smoothed trend line sits near 100% men for most of the century, then dips over the final 15 or so years of the data.</p>
+          <p>That could be the start of a real change, or it could be noise. Answering that takes a statistical test.</p>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TESTING THE TREND ================= -->
+<!-- TODO(Dan): regression numbers and interpretation carried over as-is from NobelPrizeViz.html; revisit. -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-flask"/></svg></span> Testing the trend</div>
+    <h2 class="section-title">A real shift, or one unusual year?</h2>
+    <p class="lead">To test whether women's share of prizes is rising, I fit a simple linear model to the yearly data. If it is, the slope <em>b</em> should be significant and negative: the proportion of <em>male</em> winners should be falling.</p>
+    <div class="formula-card reveal">
+      <div class="formula">
+        <span class="name">Proportion of male winners</span>
+        <span class="tilde">~</span>
+        <span>Year</span>
+      </div>
+      <p class="formula-plain">A negative, significant slope would mean the share of prizes going to men is shrinking over time.</p>
+      <div class="results">
+        <div>
+          <div class="label">All years</div>
+          <div class="p">p = .06</div>
+          <div class="b"><em>b</em> = −6: the model predicts the percentage of winners who are women rises by 6% each year.</div>
+          <span class="verdict">Marginal</span>
+        </div>
+        <div>
+          <div class="label">Excluding 2009</div>
+          <div class="p">p = .17</div>
+          <div class="b"><em>b</em> = −.02: a predicted .02% rise each year in the percentage of winners who are women.</div>
+          <span class="verdict">Not significant</span>
+        </div>
+      </div>
+    </div>
+    <div class="two-col" style="margin-top:22px">
+      <div class="pill-card">
+        <h3>Why check 2009</h3>
+        <p>A 6% yearly increase looked optimistic given the chart. In 2009, women made up an unusually large share of laureates (five winners, a record), so I refit the model without that year.</p>
+      </div>
+      <div class="pill-card">
+        <h3>What it means</h3>
+        <p><strong>The trend doesn't hold up.</strong> Once a single year is removed, the model is no longer even marginally significant. The recent uptick is worth watching, but this data can't yet show that the gap is closing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FINDING 3 ================= -->
+<section>
+  <div class="wrap chapter-head">
+    <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg></span> Finding 3 · Geography</div>
+    <h2 class="section-title">The US leads both maps, on very different scales</h2>
+  </div>
+  <div class="wide">
+    <div class="scrolly">
+      <div class="scrolly-graphic">
+        <div class="fig-head"><span class="fig-title">Laureate birth countries, 1901–2016</span></div>
+        <div class="stage" style="--ar:2561/1562" tabindex="0" role="button" aria-label="Enlarge current chart">
+          <img class="frame on" src="Plots/Nobel/map_m.png" alt="World map of male laureates' birth countries, on a scale from 1 to 250. The United States is the brightest, near the top of the scale, followed by the United Kingdom, Germany and France. Much of Europe, Russia, Canada, Japan, India, China and Australia have smaller counts.">
+          <img class="frame" src="Plots/Nobel/map_f.png" alt="World map of female laureates' birth countries, on a scale from 1 to 10. The United States is the brightest, near 10, followed by Poland. Other countries with at least one female laureate include France, Germany, Sweden, Italy, Iran, Liberia, Kenya, Yemen, Pakistan, China, South Africa, Canada and Australia.">
+          <span class="enlarge">⤢ Enlarge</span>
+        </div>
+        <div class="dots"></div>
+      </div>
+      <div class="scrolly-steps">
+        <div class="step" data-frame="0"><div class="step-card">
+          <span class="num">Build 1</span>
+          <h3>Male laureates: a transatlantic map</h3>
+          <p>Men honored with a Nobel were born mostly in the United States, then the United Kingdom, Germany and France.</p>
+        </div></div>
+        <div class="step" data-frame="1"><div class="step-card">
+          <span class="num">Build 2</span>
+          <h3>Female laureates: a wider spread</h3>
+          <p>The US leads for women too, followed by Poland, Marie Curie's birthplace. Outside Europe and North America, many of the shaded countries are the birthplaces of Peace laureates, such as Liberia, Kenya, Yemen, Iran and Pakistan.</p>
+        </div></div>
+        <div class="step" data-frame="1"><div class="step-card">
+          <span class="num">Build 3</span>
+          <h3>Read the legends before the colors</h3>
+          <p>The two maps use different scales. The top of the women's scale is about 10 laureates; the top of the men's is 250. Similar colors on the two maps can hide a difference of more than 20 times.</p>
+          <span class="stat-pill">Top of scale: 10 vs. 250</span>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= NEXT QUESTIONS ================= -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-leaf"/></svg></span> Looking ahead</div>
+    <h2 class="section-title">From findings to next questions</h2>
+    <p class="lead">Each finding points to a sharper follow-up analysis, and each would make the answer more precise.</p>
+    <div class="recs">
+      <div class="rec reveal">
+        <div class="finding"><span class="k">Finding</span><b>Narrower gaps in Peace, Literature and Economics reflect fewer prizes</b></div>
+        <div><span class="k">What it means</span><p>Raw differences mislead when categories award very different numbers of prizes.</p></div>
+        <div><span class="k">Next analysis</span><p>Compare women's share of prizes within each category, by decade.</p></div>
+      </div>
+      <div class="rec reveal">
+        <div class="finding"><span class="k">Finding</span><b>Men's prizes grew over the century; women's stayed flat</b></div>
+        <div><span class="k">What it means</span><p>The gap in raw numbers grew even as more prizes were handed out each year.</p></div>
+        <div><span class="k">Next analysis</span><p>Extend the data past 2016 to see whether the recent uptick continues.</p></div>
+      </div>
+      <div class="rec reveal">
+        <div class="finding"><span class="k">Finding</span><b>The recent trend is marginal and depends on one year</b></div>
+        <div><span class="k">What it means</span><p>Any headline about the gap closing should come with its robustness check.</p></div>
+        <div><span class="k">Next analysis</span><p>Model each laureate individually, so a year with one prize and a year with 15 don't count equally.</p></div>
+      </div>
+      <div class="rec reveal">
+        <div class="finding"><span class="k">Finding</span><b>The two birth-country maps use very different scales</b></div>
+        <div><span class="k">What it means</span><p>Side-by-side maps invite a comparison that their color scales don't support.</p></div>
+        <div><span class="k">Next analysis</span><p>Map each country's share of female laureates on a single common scale.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="glyph-row" aria-hidden="true"><svg class="ic"><use href="#i-leaf"/></svg><svg class="ic"><use href="#i-medal"/></svg><svg class="ic flip"><use href="#i-leaf"/></svg></div>
+  Nobel Gender Gap · Case Study · Daniel King<br>
+  <a href="index.html#portfolio">← Back to portfolio</a>
+</footer>
+
+<div class="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged chart">
+  <button class="close" type="button">Close ✕</button>
+  <img alt="">
+</div>
+
+<script>
+(function(){
+  document.body.classList.remove('no-js');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var narrowMQ = window.matchMedia('(max-width: 900px)');
+
+  /* ---------- hero waffle: 100 squares, last 5 = women (47 / 881 ≈ 5%) ---------- */
+  var waffle = document.getElementById('waffle');
+  if (waffle){
+    var html = '';
+    for (var i = 0; i < 100; i++){
+      html += i >= 95 ? '<span class="w" style="--d:' + ((i - 95) * 0.3) + 's"></span>' : '<span></span>';
+    }
+    waffle.innerHTML = html;
+  }
+
+  /* ---------- scrollytelling ---------- */
+  var scrollies = [].slice.call(document.querySelectorAll('.scrolly')).map(function(sc){
+    var frames = [].slice.call(sc.querySelectorAll('.frame'));
+    var steps  = [].slice.call(sc.querySelectorAll('.step'));
+    var dotsEl = sc.querySelector('.dots');
+    var stage = sc.querySelector('.stage');
+    var dots = steps.map(function(s, k){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'Go to build ' + (k+1) + ' of ' + steps.length);
+      b.addEventListener('click', function(){ goTo(k); });
+      dotsEl.appendChild(b);
+      return b;
+    });
+    var state = { cur:-1, steps:steps, stage:stage, frames:frames };
+
+    function set(i){
+      if (i === state.cur) return;
+      state.cur = i;
+      var f = +steps[i].dataset.frame;
+      frames.forEach(function(el, k){ el.classList.toggle('on', k === f); });
+      steps.forEach(function(el, k){ el.classList.toggle('active', k === i); });
+      dots.forEach(function(el, k){ el.classList.toggle('on', k === i); });
+    }
+    function goTo(k){
+      var r = steps[k].getBoundingClientRect();
+      var offset = narrowMQ.matches ? window.innerHeight * 0.55 : window.innerHeight * 0.30;
+      window.scrollTo({ top: r.top + window.pageYOffset - offset + 2, behavior: reduce ? 'auto' : 'smooth' });
+    }
+    state.set = set;
+    set(0);
+    return state;
+  });
+
+  function update(){
+    var thr = window.innerHeight * (narrowMQ.matches ? 0.72 : 0.55);
+    scrollies.forEach(function(s){
+      var idx = 0;
+      s.steps.forEach(function(st, k){ if (st.getBoundingClientRect().top < thr) idx = k; });
+      s.set(idx);
+    });
+  }
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if (!ticking){ ticking = true; requestAnimationFrame(function(){ update(); ticking = false; }); }
+  }, { passive:true });
+  window.addEventListener('resize', update);
+  update();
+
+  /* ---------- lightbox ---------- */
+  var lb = document.querySelector('.lightbox');
+  var lbImg = lb.querySelector('img');
+  var lastFocus = null;
+  function openLB(stage){
+    var on = stage.querySelector('.frame.on');
+    if (!on) return;
+    lbImg.src = on.src; lbImg.alt = on.alt;
+    lastFocus = stage;
+    lb.classList.add('open');
+    lb.querySelector('.close').focus();
+  }
+  function closeLB(){
+    lb.classList.remove('open');
+    if (lastFocus) lastFocus.focus();
+  }
+  scrollies.forEach(function(s){
+    s.stage.addEventListener('click', function(){ openLB(s.stage); });
+    s.stage.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openLB(s.stage); }
+    });
+  });
+  lb.addEventListener('click', closeLB);
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && lb.classList.contains('open')) closeLB(); });
+
+  /* ---------- reveal ---------- */
+  var revealEls = [].slice.call(document.querySelectorAll('.reveal'));
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (!en.isIntersecting) return;
+        en.target.classList.add('in');
+        io.unobserve(en.target);
+      });
+    }, { threshold:0.2 });
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('in'); });
+  }
+})();
+</script>
+</body>
+</html>

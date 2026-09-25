@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Automated Text Analysis Metric — Case Study</title>
+<meta name="description" content="How I defined, built and validated a novel NLP metric for meaning change, replacing slow, unreliable human ratings with word-embedding scores checked against an independent human benchmark. Published in Cognitive Science (2022).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#12262B;
+    --night-dark:#0A1719;
+    --cream:#F2EFE8;
+    --paper:#FCFBF8;
+    --ink:#1B1D1F;
+    --muted:#474B4F;
+    --accent:#B0433A;
+    --gold:#EDB96B;
+    --line: rgba(27,29,31,0.12);
+    --verb:#D9534A; --noun:#0F9AA5;
+    --verb-lt:#FF8E82; --noun-lt:#52D0D8;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; font-size:16px; line-height:1.6; }
+  h1,h2,h3{ font-family:'Fraunces',serif; font-weight:600; margin:0; }
+  strong{ font-weight:600; }
+  .sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  .ico{ width:1em; height:1em; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+  .eyebrow{ display:flex; align-items:center; gap:.55em; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:600; margin-bottom:.9rem; }
+  .eyebrow .ico{ width:17px; height:17px; }
+  .wrap{ max-width:760px; margin:0 auto; padding:0 28px; }
+  .wide{ max-width:1180px; margin:0 auto; padding:0 28px; }
+  @media (max-width:520px){ .wrap, .wide{ padding:0 16px; } }
+  .nw{ white-space:nowrap; }
+
+  /* ---------- HERO ---------- */
+  .hero{ background:radial-gradient(120% 140% at 15% -10%, #1F4A52 0%, var(--night) 45%, var(--night-dark) 100%); color:var(--cream); padding:84px 0 72px; position:relative; overflow:hidden; }
+  .hero-grid{ display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); gap:56px; align-items:center; }
+  @media (max-width:960px){ .hero-grid{ grid-template-columns:1fr; gap:40px; } }
+  .icon-row{ display:flex; gap:22px; color:var(--gold); opacity:.9; margin-bottom:22px; }
+  .icon-row .ico{ width:24px; height:24px; stroke-width:1.6; }
+  .hero h1{ font-size:clamp(2.2rem, 5vw, 3.2rem); line-height:1.12; letter-spacing:-0.01em; max-width:20ch; }
+  .hero .hl{ color:var(--gold); font-style:italic; }
+  .hero p.sub{ margin-top:18px; max-width:52ch; font-size:1.08rem; color:rgba(242,239,232,0.84); }
+  .paper-btn{ display:inline-flex; align-items:center; gap:.55em; margin-top:26px; padding:11px 20px; border-radius:99px; background:var(--gold); color:var(--night-dark); font-weight:600; font-size:.94rem; text-decoration:none; transition:background .2s, transform .2s; }
+  .paper-btn:hover{ background:#F6CC8C; transform:translateY(-1px); }
+  .paper-btn:focus-visible{ outline:2px solid var(--cream); outline-offset:3px; }
+  .cite{ font-size:.8rem; color:rgba(242,239,232,.6); margin-top:10px; }
+  .meta-row{ display:flex; flex-wrap:wrap; gap:18px 34px; margin-top:38px; padding-top:26px; border-top:1px solid rgba(242,239,232,0.18); }
+  .meta-item .label{ font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:4px; }
+  .meta-item .val{ font-size:.92rem; color:var(--cream); }
+
+  /* vector diagram card */
+  .vec-card{ background:rgba(242,239,232,.05); border:1px solid rgba(242,239,232,.16); border-radius:18px; padding:22px 24px 18px; box-shadow:0 20px 50px rgba(0,0,0,.25); }
+  .vec-head{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  .vec-head .m-label{ font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); }
+  .vec-head .tag{ font-size:.68rem; color:rgba(242,239,232,.5); }
+  .vec-card svg.dia{ display:block; width:100%; height:auto; margin-top:6px; }
+  .vec-card svg text{ font-family:'Inter',sans-serif; }
+  .vl{ font-size:17px; font-weight:600; }
+  .vs{ font-size:14px; fill:rgba(242,239,232,.8); }
+  .vp{ font-family:'Fraunces',serif !important; font-size:18px; fill:var(--gold); }
+  .vec-line{ stroke-width:2.5; stroke-linecap:round; }
+  .draw{ stroke-dasharray:260; stroke-dashoffset:260; animation:draw 1.2s cubic-bezier(.3,.7,.2,1) forwards; }
+  .draw.d2{ animation-delay:.45s; } .draw.d3{ animation-delay:.9s; }
+  .fade-in{ opacity:0; animation:fin .6s ease forwards; animation-delay:1.5s; }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+  @keyframes fin{ to{ opacity:1; } }
+  .vec-foot{ font-size:1rem; line-height:1.5; color:rgba(242,239,232,.85); margin-top:8px; padding-top:14px; border-top:1px solid rgba(242,239,232,.12); }
+  .vec-foot strong{ color:var(--cream); }
+
+  /* ---------- SECTIONS ---------- */
+  section{ padding:64px 0; }
+  section.alt{ background:var(--cream); }
+  .section-title{ font-size:1.7rem; margin-bottom:14px; line-height:1.25; }
+  .lead{ font-size:1.05rem; color:var(--muted); max-width:60ch; margin:0 0 .6rem; }
+  ul.tight{ margin:14px 0 0; padding-left:20px; }
+  ul.tight li{ font-size:.96rem; margin-bottom:10px; color:#3a3d40; max-width:62ch; }
+  .note{ font-size:.82rem; color:#85878a; margin-top:28px; border-top:1px dashed var(--line); padding-top:16px; }
+  .note a{ color:var(--accent); }
+
+  .glance{ display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:30px; }
+  @media (max-width:640px){ .glance{ grid-template-columns:1fr; } }
+  .g-card{ background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:22px 22px 20px; position:relative; overflow:hidden; }
+  .g-card::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--c, var(--accent)); }
+  .g-num{ font-family:'Fraunces',serif; font-size:2.1rem; line-height:1; color:var(--night); margin-bottom:10px; letter-spacing:-0.01em; }
+  .g-num small{ font-size:1rem; color:var(--muted); font-family:'Inter',sans-serif; font-weight:500; }
+  .g-card p{ margin:0; font-size:.92rem; color:#3a3d40; }
+
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:28px; }
+  @media (max-width:640px){ .two-col{ grid-template-columns:1fr; } }
+  .pill-card{ background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:20px 22px; }
+  .pill-card .k{ display:block; font-size:.66rem; text-transform:uppercase; letter-spacing:.1em; font-weight:600; color:var(--accent); margin-bottom:6px; }
+  .pill-card ul{ margin:6px 0 0; padding-left:18px; }
+  .pill-card li{ font-size:.9rem; color:#3a3d40; margin-bottom:6px; }
+
+  /* attribution problem */
+  .split-demo{ margin-top:28px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:24px 24px 18px; box-shadow:0 10px 30px rgba(18,38,43,.06); }
+  .split-demo .k{ font-size:.66rem; text-transform:uppercase; letter-spacing:.1em; font-weight:600; color:var(--accent); }
+  .sd-row{ font-family:'Fraunces',serif; font-size:1.35rem; line-height:1.9; color:var(--night); margin-top:4px; }
+  .sd-row .arr{ font-family:'Inter',sans-serif; color:#9a9c9f; margin:0 .35em; font-size:1rem; }
+  .u-n{ border-bottom:4px solid var(--noun); padding-bottom:1px; }
+  .u-v{ border-bottom:4px solid var(--verb); padding-bottom:1px; }
+  .u-q{ padding-bottom:1px; background-image:repeating-linear-gradient(90deg, var(--noun) 0 8px, var(--verb) 8px 16px); background-size:100% 4px; background-repeat:no-repeat; background-position:0 100%; }
+  .sd-legend{ display:flex; flex-wrap:wrap; gap:6px 18px; margin-top:12px; font-size:.78rem; color:#5d5f62; }
+  .sd-legend i{ display:inline-block; width:22px; height:4px; vertical-align:middle; margin-right:6px; border-radius:2px; }
+  .sd-q{ font-size:.9rem; color:var(--muted); margin-top:10px; }
+
+  /* problems panel */
+  .problems{ margin-top:18px; background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:22px 24px; }
+  .pb-head{ display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:8px 16px; }
+  .pb-head h3{ font-size:1.05rem; color:var(--night); }
+  .pb-methods{ display:flex; flex-wrap:wrap; gap:6px; }
+  .pb-methods span{ font-size:.74rem; color:#5d5f62; border:1px solid var(--line); border-radius:99px; padding:2px 10px; background:#fff; }
+  .pb-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:16px; }
+  @media (max-width:640px){ .pb-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:480px){ .pb{ flex-direction:column; gap:6px; padding:11px; } }
+  .pb{ display:flex; gap:10px; align-items:flex-start; background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 12px; }
+  .pb .x{ width:22px; height:22px; border-radius:50%; background:rgba(176,67,58,.1); color:var(--accent); font-weight:700; font-size:.75rem; display:flex; align-items:center; justify-content:center; flex:none; margin-top:1px; }
+  .pb b{ display:block; font-family:'Fraunces',serif; font-weight:600; color:var(--night); font-size:.96rem; line-height:1.25; }
+  .pb span.d{ display:block; font-size:.76rem; color:#6b6d70; line-height:1.4; margin-top:2px; }
+
+  .reqs{ margin-top:18px; background:var(--night); color:var(--cream); border-radius:14px; padding:20px 22px; }
+  .reqs .k{ font-size:.66rem; text-transform:uppercase; letter-spacing:.12em; color:var(--gold); font-weight:600; }
+  .req-list{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .req{ font-size:.84rem; padding:5px 12px; border-radius:99px; border:1px solid rgba(242,239,232,.25); color:var(--cream); display:inline-flex; gap:7px; align-items:center; }
+  .req b{ color:var(--gold); font-weight:700; }
+
+  /* method explanation panels */
+  .xp-row{ display:grid; grid-template-columns:1.35fr 1fr 1.2fr; gap:14px; margin-top:28px; }
+  @media (max-width:760px){ .xp-row{ grid-template-columns:1fr; } }
+  .xp{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 18px 16px; box-shadow:0 6px 18px rgba(18,38,43,.05); position:relative; }
+  .xp .n{ display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:var(--night); color:var(--gold); font-size:.74rem; font-weight:700; margin-bottom:10px; }
+  .xp p{ margin:0; font-family:'Fraunces',serif; font-size:1.08rem; color:var(--night); line-height:1.4; }
+  .xp p.big{ font-size:1.15rem; }
+  .xp strong{ color:var(--night); }
+
+  .formula-card{ margin-top:22px; background:var(--night); color:var(--cream); border-radius:16px; padding:26px 30px 24px; }
+  .meter{ display:grid; grid-template-columns:minmax(120px,190px) 1fr 44px; align-items:center; gap:14px; margin-top:12px; font-size:.88rem; }
+  .meter .who{ color:rgba(242,239,232,.85); }
+  .track{ display:block; height:12px; background:rgba(242,239,232,.1); border-radius:99px; overflow:hidden; }
+  .fill{ display:block; height:100%; width:0; border-radius:99px; transition:width 1.3s cubic-bezier(.2,.7,.2,1); }
+  .in .fill, .no-js .fill{ width:var(--w); }
+  .meter .num{ font-family:'Fraunces',serif; font-size:1.2rem; text-align:right; }
+  .example .label{ font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:8px; }
+  .ex-sent{ font-family:'Fraunces',serif; font-size:1.15rem; margin-bottom:10px; }
+  .ex-sent .arr{ color:rgba(242,239,232,.5); margin:0 .4em; font-family:'Inter',sans-serif; }
+  .verdict{ margin-top:14px; font-size:.92rem; color:rgba(242,239,232,.85); }
+  .verdict b{ color:var(--gold); }
+  @media (max-width:560px){
+    .formula-card{ padding:22px 18px; }
+    .meter{ grid-template-columns:1fr 40px; gap:6px 12px; }
+    .meter .who{ grid-column:1 / -1; }
+  }
+
+  /* validation scorecard */
+  .score{ margin-top:28px; display:grid; gap:10px; }
+  .srow{ display:grid; grid-template-columns:44px 1fr auto; gap:14px; align-items:center; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:14px 18px; text-decoration:none; color:inherit; }
+  a.srow{ transition:border-color .2s, transform .2s; }
+  a.srow:hover{ border-color:rgba(176,67,58,.45); transform:translateX(3px); }
+  .srow .no{ width:36px; height:36px; border-radius:50%; background:var(--night); color:var(--gold); font-family:'Fraunces',serif; font-weight:600; display:flex; align-items:center; justify-content:center; }
+  .srow .t, .srow .res{ display:block; }
+  .srow .t{ font-family:'Fraunces',serif; font-weight:600; color:var(--night); font-size:1.02rem; line-height:1.3; }
+  .srow .type{ display:inline-block; font-size:.64rem; text-transform:uppercase; letter-spacing:.1em; font-weight:600; color:var(--accent); margin-right:8px; }
+  .srow .res{ font-size:.86rem; color:#4d5054; margin-top:2px; }
+  .srow .pass{ font-size:.72rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--noun); background:rgba(15,154,165,.1); border-radius:99px; padding:4px 10px; white-space:nowrap; }
+  .srow .more{ font-size:.72rem; color:var(--accent); font-weight:600; margin-left:6px; white-space:nowrap; }
+  @media (max-width:560px){ .srow{ grid-template-columns:36px 1fr; } .srow .pass{ display:none; } .srow .no{ width:30px; height:30px; font-size:.9rem; } }
+
+  .check-head{ display:flex; align-items:center; gap:12px; margin:0 0 10px; }
+  .check-head .no{ width:32px; height:32px; border-radius:50%; background:var(--night); color:var(--gold); font-family:'Fraunces',serif; font-weight:600; display:flex; align-items:center; justify-content:center; flex:none; }
+  .check-head .type{ font-size:.72rem; text-transform:uppercase; letter-spacing:.12em; font-weight:600; color:var(--accent); }
+
+  /* charts */
+  .chart-card{ background:#fff; border:1px solid var(--line); border-radius:14px; box-shadow:0 10px 30px rgba(18,38,43,.07); padding:18px 18px 14px; }
+  .fig-head{ margin-bottom:8px; }
+  .fig-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1rem; color:var(--night); }
+  .fig-sub{ font-size:.8rem; color:#6b6d70; }
+  .chart-box{ position:relative; width:100%; }
+  .legend{ display:flex; flex-wrap:wrap; gap:6px 18px; justify-content:center; margin-top:8px; font-size:12.5px; color:#5d5f62; }
+  .legend > span{ display:inline-flex; align-items:center; gap:6px; }
+  .key{ display:inline-block; }
+  .key.ln{ width:18px; height:0; border-top:2px solid var(--c); }
+  .key.dot{ width:9px; height:9px; border-radius:50%; background:#6b6d70; }
+  .key.dia{ width:8px; height:8px; background:#6b6d70; transform:rotate(45deg); }
+
+  svg text{ font-family:'Inter',sans-serif; }
+  .tick{ font-size:11px; fill:#7d7f82; font-variant-numeric:tabular-nums; }
+  .xtitle{ font-size:11.5px; fill:#46444F; font-weight:500; }
+  .ptitle{ font-size:12px; fill:#1B1D1F; font-weight:600; }
+  .psub{ font-size:11px; fill:#6b6d70; }
+  .annot{ font-size:11.5px; fill:#46444F; font-weight:600; }
+
+  /* scrolly */
+  .scrolly{ display:grid; grid-template-columns:minmax(250px, 320px) 1fr; grid-template-areas:"steps graphic"; gap:48px; position:relative; }
+  .scrolly-graphic{ grid-area:graphic; position:sticky; top:9vh; align-self:start; }
+  .scrolly-steps{ grid-area:steps; padding:4vh 0 10vh; }
+  #cv{ height:400px; }
+  .dots{ display:flex; gap:8px; justify-content:center; margin-top:12px; }
+  .dots button{ width:28px; height:6px; border-radius:99px; border:0; padding:0; background:rgba(27,29,31,.14); cursor:pointer; transition:background .3s, width .3s; }
+  .dots button.on{ background:var(--accent); width:44px; }
+  .dots button:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+  .step{ min-height:70vh; display:flex; flex-direction:column; justify-content:center; }
+  .step-card{ border-left:3px solid var(--line); padding:6px 0 6px 20px; opacity:.35; transition:opacity .45s, border-color .45s; }
+  .step.active .step-card{ opacity:1; border-color:var(--accent); }
+  .step .num{ font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:600; display:block; margin-bottom:6px; }
+  .step h3{ font-size:1.18rem; line-height:1.3; margin-bottom:8px; color:var(--night); }
+  .step p{ margin:0; font-size:.95rem; color:var(--muted); }
+  .stat-pill{ display:inline-block; margin-top:12px; font-family:'Fraunces',serif; font-weight:600; font-size:1.02rem; padding:4px 12px; border-radius:8px; background:rgba(237,185,107,.22); color:#6b4a00; }
+  .sw{ display:inline-block; width:.62em; height:.62em; border-radius:50%; background:var(--c); margin:0 .18em 0 .05em; vertical-align:.05em; }
+  .pl{ white-space:nowrap; }
+  #cv .panel-b, #cv .poly-annot, #cv .series{ transition:opacity .55s ease; }
+  #cv[data-step="0"] .panel-b .series{ opacity:0; }
+  #cv[data-step="0"] .panel-b{ opacity:.35; }
+  #cv .poly-annot{ opacity:0; }
+  #cv[data-step="2"] .poly-annot{ opacity:1; }
+  @media (max-width:900px){
+    .scrolly{ display:block; }
+    .scrolly-graphic{ position:sticky; top:0; z-index:3; background:var(--paper); padding:8px 0 6px; box-shadow:0 12px 14px -12px rgba(18,38,43,.25); }
+    section.alt .scrolly-graphic{ background:var(--cream); }
+    .scrolly .chart-card{ padding:10px 8px 8px; }
+    #cv{ height:270px; }
+    .legend{ font-size:11px; gap:4px 12px; }
+    .scrolly-steps{ padding:6vh 0 30vh; position:relative; z-index:1; }
+    .step{ min-height:62vh; justify-content:flex-start; padding-top:4vh; }
+    .step-card{ background:var(--paper); border:1px solid var(--line); border-left:3px solid var(--line); border-radius:10px; padding:16px 18px; opacity:.55; }
+    .step.active .step-card{ border-left-color:var(--accent); }
+    .scrolly .fig-sub{ display:none; }
+    .dots{ margin-top:6px; }
+  }
+
+  .tip{ position:absolute; z-index:6; pointer-events:none; background:#fff; border:1px solid var(--line); border-radius:8px; box-shadow:0 8px 22px rgba(18,38,43,.14); padding:8px 10px; font-size:.76rem; color:var(--muted); opacity:0; transition:opacity .12s; white-space:nowrap; }
+  .tip.on{ opacity:1; }
+  .tip .tt{ font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:#8a8c8f; margin-bottom:4px; }
+  .tip .row{ display:flex; align-items:center; gap:8px; }
+  .tip .row b{ color:var(--ink); font-variant-numeric:tabular-nums; min-width:34px; }
+  .tip .lk{ width:12px; height:0; border-top:2px solid var(--c); }
+
+  details.data{ margin-top:10px; font-size:.8rem; color:var(--muted); }
+  details.data summary{ cursor:pointer; color:var(--accent); font-weight:500; width:max-content; }
+  details.data table{ border-collapse:collapse; margin-top:8px; width:100%; max-width:560px; font-variant-numeric:tabular-nums; }
+  details.data th, details.data td{ text-align:left; padding:4px 10px 4px 0; border-bottom:1px solid var(--line); }
+  details.data th{ font-weight:600; color:var(--ink); }
+
+  /* applied benefits */
+  .ben{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:26px; }
+  @media (max-width:700px){ .ben{ grid-template-columns:1fr; } }
+  .ben .b{ background:var(--night); color:var(--cream); border-radius:12px; padding:20px 20px 22px; }
+  .ben .k{ display:block; font-size:.66rem; text-transform:uppercase; letter-spacing:.12em; font-weight:600; color:var(--gold); }
+  .ben .n{ font-family:'Fraunces',serif; font-size:1.45rem; line-height:1.15; color:var(--cream); margin:8px 0 10px; }
+  .ben p{ margin:0; font-size:.86rem; color:rgba(242,239,232,.82); }
+  .xlink{ display:inline-flex; gap:.4em; margin-top:20px; font-weight:600; color:var(--accent); text-decoration:none; font-size:.92rem; }
+  .xlink:hover{ text-decoration:underline; }
+
+  /* applications */
+  .apps{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:26px; }
+  @media (max-width:640px){ .apps{ grid-template-columns:1fr; } }
+  .app{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 20px; box-shadow:0 6px 18px rgba(18,38,43,.05); }
+  .app .tags{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .app .tag{ font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; font-weight:600; padding:3px 9px; border-radius:99px; }
+  .app .tag.pa{ background:rgba(15,154,165,.1); color:#0B6F77; }
+  .app .tag.ux{ background:rgba(176,67,58,.09); color:var(--accent); }
+  .app h3{ font-size:1.05rem; color:var(--night); margin-bottom:6px; line-height:1.3; }
+  .app p{ margin:0; font-size:.9rem; color:#3a3d40; }
+  .thread{ margin-top:18px; background:var(--night); color:var(--cream); border-radius:14px; padding:20px 22px; }
+  .thread .k{ font-size:.66rem; text-transform:uppercase; letter-spacing:.12em; color:var(--gold); font-weight:600; }
+  .thread p{ margin:6px 0 0; font-size:.95rem; color:rgba(242,239,232,.88); max-width:64ch; }
+
+  footer{ background:var(--night-dark); color:rgba(242,239,232,0.6); text-align:center; padding:40px 0; font-size:.84rem; }
+  footer .icon-row{ justify-content:center; margin-bottom:12px; gap:16px; }
+  footer .icon-row .ico{ width:18px; height:18px; }
+  footer a{ color:var(--gold); text-decoration:none; }
+  footer a:hover{ text-decoration:underline; }
+
+  .reveal{ opacity:0; transform:translateY(14px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.in{ opacity:1; transform:none; }
+  .no-js .reveal{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    .draw{ animation:none; stroke-dashoffset:0; }
+    .fade-in{ animation:none; opacity:1; }
+    .step-card, .reveal, .fill, #cv .panel-b, #cv .poly-annot, #cv .series{ transition:none; }
+    .reveal{ opacity:1; transform:none; }
+  }
+</style>
+</head>
+<body class="no-js">
+
+<!-- icon sprite: pencil, magnifying glass, open book, flask, graduation cap -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M16.5 3.5l4 4L8 20H4v-4z"/><path d="M14 6l4 4"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M3 5.5c3-1.2 6-1.2 9 .8 3-2 6-2 9-.8V19c-3-1.2-6-1.2-9 .8-3-2-6-2-9-.8z"/><path d="M12 6.3v13.5"/></symbol>
+  <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6"/><path d="M10 3v6L4.6 18.4A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.4-2.6L14 9V3"/><path d="M7.2 15h9.6"/></symbol>
+  <symbol id="i-cap" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/><path d="M22 9v6"/></symbol>
+</svg>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="wide">
+    <div class="hero-grid">
+      <div>
+        <div class="icon-row" aria-hidden="true">
+          <svg class="ico"><use href="#i-pencil"/></svg><svg class="ico"><use href="#i-book"/></svg><svg class="ico"><use href="#i-search"/></svg><svg class="ico"><use href="#i-flask"/></svg>
+        </div>
+        <h1>Building an <span class="hl">automated</span> text analysis metric that scales</h1>
+        <p class="sub">The existing methodology for open-ended text analysis used human raters and was slow, costly, and unreliable. I developed and validated a novel metric using NLP techniques that automated and scaled the assessment process.</p>
+        <a class="paper-btn" href="King_Gentner_2021_Verb%20Metaphoric%20Extension%20Under%20Semantic%20Strain.pdf" target="_blank" rel="noopener">Read the full paper (PDF) <span aria-hidden="true">↗</span><span class="sr-only">(opens in a new tab)</span></a>
+        <div class="cite">King &amp; Gentner (2022). Verb metaphoric extension under semantic strain. <em>Cognitive Science</em>, 46, e13141.</div>
+        <div class="meta-row">
+          <div class="meta-item"><div class="label">Role</div><div class="val">First author</div></div>
+          <div class="meta-item"><div class="label">Metric</div><div class="val">word2vec cosine similarity</div></div>
+          <div class="meta-item"><div class="label">Validation</div><div class="val">5 checks · 3 experiments</div></div>
+          <div class="meta-item"><div class="label">Scale</div><div class="val">430 participants · 2,700+ paraphrases</div></div>
+          <div class="meta-item"><div class="label">Tools</div><div class="val">R · Python · word2vec</div></div>
+        </div>
+      </div>
+      <div class="vec-card" role="img" aria-label="Illustration: the paraphrase 'The candle flickered' as a vector. The original noun 'lantern' points close to it (score 0.47); the original verb 'limped' points far away (score 0.22), so the verb's meaning changed more.">
+        <div class="vec-head"><span class="m-label">The metric in one picture</span><span class="tag">Illustration, not to scale</span></div>
+        <svg class="dia" viewBox="0 0 460 356" aria-hidden="true">
+          <defs>
+            <marker id="ah-n" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#52D0D8"/></marker>
+            <marker id="ah-v" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#FF8E82"/></marker>
+            <marker id="ah-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#EDB96B"/></marker>
+          </defs>
+          <line class="vec-line draw" x1="70" y1="150" x2="286" y2="150" stroke="#EDB96B" marker-end="url(#ah-p)"/>
+          <line class="vec-line draw d2" x1="70" y1="150" x2="242.2" y2="69.7" stroke="#52D0D8" marker-end="url(#ah-n)"/>
+          <line class="vec-line draw d3" x1="70" y1="150" x2="100.4" y2="322.3" stroke="#FF8E82" marker-end="url(#ah-v)"/>
+          <g class="fade-in">
+            <path d="M160,150 A90,90 0 0 0 151.6,112" fill="none" stroke="#52D0D8" stroke-width="1.5"/>
+            <path d="M130,150 A60,60 0 0 1 80.4,209.1" fill="none" stroke="#FF8E82" stroke-width="1.5"/>
+            <text class="vs" x="176" y="132">score <tspan font-weight="700" fill="#52D0D8">.47</tspan></text>
+            <text class="vs" x="140" y="210">score <tspan font-weight="700" fill="#FF8E82">.22</tspan></text>
+            <text class="vl" x="252" y="60" fill="#52D0D8">lantern</text>
+            <text class="vs" x="252" y="79">original noun</text>
+            <text class="vl" x="112" y="330" fill="#FF8E82">limped</text>
+            <text class="vs" x="112" y="349">original verb</text>
+            <text class="vp" x="296" y="145">“The candle</text>
+            <text class="vp" x="296" y="166">flickered”</text>
+            <text class="vs" x="296" y="188">the paraphrase</text>
+          </g>
+        </svg>
+        <div class="vec-foot">The <strong>smaller the angle</strong>, the <strong>more of that word's meaning is preserved</strong> in the interpretation.</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= KEY STRENGTHS ================= -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ico" aria-hidden="true"><use href="#i-cap"/></svg> Key strengths</div>
+    <h2 class="section-title">What this case study shows about how I work</h2>
+    <ul class="tight">
+      <li><strong>I automate processes to make them reliable and scalable.</strong> I replaced slow, inconsistent human ratings with an automated method that scores every response the same way, at any volume.</li>
+      <li><strong>I build tools that cut cost and turnaround time.</strong> Scoring went from rounds of paid human judging to an instant, free computation, without giving up rigor.</li>
+      <li><strong>I define what a metric has to do before choosing how to build it.</strong> The failures of earlier human methods became a list of requirements.</li>
+      <li><strong>I choose instruments that can't be tuned toward the answer.</strong> Off-the-shelf embeddings meant no free parameters to adjust until the results looked right.</li>
+      <li><strong>I validate against independent evidence, not just face validity.</strong> A known result, a human benchmark and blind qualitative coding all had to agree.</li>
+      <li><strong>I hunt for confounds.</strong> I tested the explanation most likely to fool the metric, paraphrase length, and ruled it out.</li>
+    </ul>
+    <p class="note">Adapted from King &amp; Gentner (2022), <em>Cognitive Science</em>, co-authored with Dedre Gentner. All statistics are from the published paper. Fitted lines in the validation chart are redrawn from its figures and are approximate. For the language findings themselves, see the <a href="verb-metaphor-case-study.html">companion case study</a>.</p>
+  </div>
+</section>
+
+<!-- ================= AT A GLANCE ================= -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg> At a glance</div>
+    <h2 class="section-title">A new measure, tested five ways</h2>
+    <div class="glance">
+      <div class="g-card reveal" style="--c:var(--gold)">
+        <div class="g-num"><span data-count="1742">1,742</span> <small>paraphrases</small></div>
+        <p><strong>Scored automatically across two experiments</strong>, with no splitting and no human raters needed to score them.</p>
+      </div>
+      <div class="g-card reveal" style="--c:var(--noun)">
+        <div class="g-num">3 of 3</div>
+        <p><strong>An independent human benchmark reproduced every pattern the metric found</strong>, one of them marginally.</p>
+      </div>
+      <div class="g-card reveal" style="--c:var(--verb)">
+        <div class="g-num">13 → 69</div>
+        <p><strong>Blind-coded metaphoric verb changes rose steadily across the metric's score quartiles</strong>, from least to most changed.</p>
+      </div>
+      <div class="g-card reveal" style="--c:var(--night)">
+        <div class="g-num">Length-proof</div>
+        <p><strong>Paraphrase length didn't track strain</strong> (p = .82 and .49), and controlling for it left the estimates nearly unchanged.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= THE MEASUREMENT PROBLEM ================= -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ico" aria-hidden="true"><use href="#i-book"/></svg> The measurement problem</div>
+    <h2 class="section-title">How do you measure how far a word's meaning moved?</h2>
+    <p class="lead">The research needed to know how much the noun and the verb each changed when people reinterpreted odd sentences. But paraphrases blend the two, and there's no ground truth to check against.</p>
+
+    <div class="split-demo reveal">
+      <span class="k">An example from the paper</span>
+      <div class="sd-row">The <span class="u-n">car</span> <span class="u-v">limped</span><span class="arr">→</span>The <span class="u-q">badly functioning</span> <span class="u-n">vehicle</span> <span class="u-q">struggled to drive</span></div>
+      <div class="sd-legend"><span><i style="background:var(--noun)"></i>from the noun</span><span><i style="background:var(--verb)"></i>from the verb</span><span><i style="background-image:repeating-linear-gradient(90deg, var(--noun) 0 8px, var(--verb) 8px 16px)"></i>from both? Judges couldn't agree</span></div>
+      <p class="sd-q">Which part came from <em>car</em> and which from <em>limped</em>? Every earlier method depended on human judges answering questions like this.</p>
+    </div>
+
+    <div class="problems reveal">
+      <div class="pb-head">
+        <h3>Three human-rater approaches, the same problems</h3>
+        <div class="pb-methods"><span>Divide and rate</span><span>Retrace</span><span>Double paraphrase</span></div>
+      </div>
+      <div class="pb-grid">
+        <div class="pb"><span class="x">✕</span><span><b>Slow</b><span class="d">Time-consuming, labor-intensive judging</span></span></div>
+        <div class="pb"><span class="x">✕</span><span><b>Expensive</b><span class="d">New judges or participants for every study</span></span></div>
+        <div class="pb"><span class="x">✕</span><span><b>Judges can't agree</b><span class="d">Splitting a paraphrase is a judgment call</span></span></div>
+        <div class="pb"><span class="x">✕</span><span><b>Low reliability</b><span class="d">Subjective ratings vary from judge to judge</span></span></div>
+        <div class="pb"><span class="x">✕</span><span><b>Doesn't scale</b><span class="d">Effort and cost grow with every response</span></span></div>
+        <div class="pb"><span class="x">✕</span><span><b>Loses most of the data</b><span class="d">In one method, only 4% of verbs resurfaced</span></span></div>
+      </div>
+    </div>
+
+    <div class="reqs reveal">
+      <span class="k">So the new metric had to be</span>
+      <div class="req-list">
+        <span class="req"><b>✓</b>No splitting</span>
+        <span class="req"><b>✓</b>Graded, not yes/no</span>
+        <span class="req"><b>✓</b>Every response scored</span>
+        <span class="req"><b>✓</b>No judgment calls</span>
+        <span class="req"><b>✓</b>Scalable and replicable</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DEFINITION AND CONSTRUCTION ================= -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ico" aria-hidden="true"><use href="#i-pencil"/></svg> Definition and construction</div>
+    <h2 class="section-title">Meaning retained: how close the paraphrase stays to the original word</h2>
+    <p class="lead">Word embedding models from NLP offered a solution to the human-rater problem: reliable estimates of meaning change that can be calculated instantly, scaled to as many datapoints as necessary, for free.</p>
+    <div class="xp-row">
+      <div class="xp reveal"><span class="n">1</span><p>I developed a method for producing noun- and verb-change scores for each participant's response using <strong>cosine similarity</strong> as a metric.</p></div>
+      <div class="xp reveal"><span class="n">2</span><p class="big">Lower scores = more meaning change</p></div>
+      <div class="xp reveal"><span class="n">3</span><p class="big">If the verb-change score is lower than the noun-change score, then the verb changed more</p></div>
+    </div>
+    <div class="formula-card reveal">
+      <div class="example">
+        <div class="label">Worked example from the paper</div>
+        <div class="ex-sent">The lantern limped <span class="arr">→</span> “The candle flickered”</div>
+        <div class="meter"><span class="who"><b>lantern</b> ↔ paraphrase</span><span class="track"><span class="fill" style="--w:47%; background:var(--noun-lt)"></span></span><span class="num">.47</span></div>
+        <div class="meter"><span class="who"><b>limped</b> ↔ paraphrase</span><span class="track"><span class="fill" style="--w:22%; background:var(--verb-lt)"></span></span><span class="num">.22</span></div>
+        <p class="verdict">The verb's score (.22) is lower than the noun's (.47): <b>the verb changed meaning more.</b></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VALIDATION OVERVIEW ================= -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ico" aria-hidden="true"><use href="#i-flask"/></svg> Validation</div>
+    <h2 class="section-title">Five ways I tried to break the metric</h2>
+    <p class="lead">A new metric earns trust by passing tests it could have failed. Each check below uses evidence that doesn't depend on the embeddings themselves.</p>
+    <div class="score">
+      <div class="srow reveal"><span class="no">1</span><span><span class="t">Reproduces a known human-judged result</span><span class="res"><span class="type">Replication</span>Same verb-vs-noun pattern human judges found in 1988</span></span><span class="pass">Passed</span></div>
+      <div class="srow reveal"><span class="no">2</span><span><span class="t">Responds to a finer-grained input</span><span class="res"><span class="type">Sensitivity</span>Effect grows when strain is rated, not labeled yes/no</span></span><span class="pass">Passed</span></div>
+      <a class="srow reveal" href="#v3"><span class="no">3</span><span><span class="t">Agrees with an independent human measure</span><span class="res"><span class="type">Convergent validity</span>Human benchmark reproduced all three patterns<span class="more">See below ↓</span></span></span><span class="pass">Passed</span></a>
+      <div class="srow reveal"><span class="no">4</span><span><span class="t">Low scores mean what they should</span><span class="res"><span class="type">Construct validity</span>Blind coding: bigger scored change, more metaphor</span></span><span class="pass">Passed</span></div>
+      <div class="srow reveal"><span class="no">5</span><span><span class="t">Isn't driven by a nuisance variable or exclusions</span><span class="res"><span class="type">Confounds &amp; robustness</span>Length and data exclusions ruled out</span></span><span class="pass">Passed</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CHECK 3 (SCROLLY) ================= -->
+<section id="v3">
+  <div class="wrap" style="margin-bottom:30px">
+    <div class="check-head"><span class="no">3</span><span class="type">Convergent validity · Experiment 3 · 71 people, 1,012 re-paraphrases</span></div>
+    <h2 class="section-title">Does an independent human measure agree?</h2>
+    <p class="lead">Embeddings have known blind spots, so I re-measured Experiment 2 with no algorithm at all. New people paraphrased the paraphrases, and I counted how often the original words came back: lossy, but objective.</p>
+  </div>
+  <div class="wide">
+    <div class="scrolly">
+      <div class="scrolly-graphic">
+        <div class="chart-card">
+          <div class="fig-head">
+            <div class="fig-title">Same data, two instruments</div>
+            <div class="fig-sub">Fitted lines as strain rises · left: the metric (Exp 2) · right: human benchmark (Exp 3) · each panel on its own scale</div>
+          </div>
+          <div class="chart-box" id="cv" data-step="0"></div>
+          <div class="legend">
+            <span><span class="key ln" style="--c:var(--noun)"></span>Noun</span>
+            <span><span class="key ln" style="--c:var(--verb)"></span>Verb</span>
+            <span><span class="key dot"></span>few meanings</span>
+            <span><span class="key dia"></span>many meanings</span>
+          </div>
+        </div>
+        <div class="dots"></div>
+      </div>
+      <div class="scrolly-steps">
+        <div class="step" data-step="0"><div class="step-card">
+          <span class="num">Build 1</span>
+          <h3>What the metric says</h3>
+          <p>As sentences get stranger, <span class="pl"><span class="sw" style="--c:var(--verb)"></span>verb</span> similarity falls (<span class="nw">p = .001</span>) while <span class="pl"><span class="sw" style="--c:var(--noun)"></span>noun</span> similarity stays flat (<span class="nw">p = .65</span>).</p>
+        </div></div>
+        <div class="step" data-step="1"><div class="step-card">
+          <span class="num">Build 2</span>
+          <h3>What people say, with no algorithm</h3>
+          <p>In the human task, verbs came back less often as strain rose (<span class="nw">p = .02</span>). Nouns didn't move (<span class="nw">p = .69</span>). Different instrument, same shape.</p>
+          <span class="stat-pill">Nouns came back 2× as often: 21% vs. 10%</span>
+        </div></div>
+        <div class="step" data-step="2"><div class="step-card">
+          <span class="num">Build 3</span>
+          <h3>Even where embeddings are weakest</h3>
+          <p>Embeddings are known to be less accurate for words with many meanings. Humans showed the same polysemy effect: many-meaning words changed more in both (humans: verbs <span class="nw">p &lt; .01</span>, nouns marginal at <span class="nw">p = .06</span>).</p>
+          <span class="stat-pill">3 of 3 patterns reproduced</span>
+        </div></div>
+      </div>
+    </div>
+    <div class="wrap" style="padding:0">
+      <details class="data">
+        <summary>View data</summary>
+        <table>
+          <thead><tr><th>Effect</th><th>Metric (Exp 2)</th><th>Human benchmark (Exp 3)</th></tr></thead>
+          <tbody>
+            <tr><td>Verbs change more than nouns</td><td>β = 0.04, p = .01</td><td>β = 1.24 (logit), p &lt; .001</td></tr>
+            <tr><td>Strain → verb change</td><td>β = −0.29, p = .001</td><td>β = −0.25, p = .02</td></tr>
+            <tr><td>Strain → noun change</td><td>β = −0.03, p = .65</td><td>β = −0.02, p = .69</td></tr>
+            <tr><td>Polysemy → verb change</td><td>β = −0.22, p = .01</td><td>β = −0.63, p &lt; .01</td></tr>
+            <tr><td>Polysemy → noun change</td><td>β = −0.16, p = .01</td><td>β = −0.20, p = .06</td></tr>
+          </tbody>
+        </table>
+        <p>Human resurfacing rates: nouns 24.2% (few meanings), 18.0% (many); verbs 13.9% (few), 6.9% (many). Fitted lines are read from the paper's Figs. 4 and 5 and are approximate.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= APPLIED BENEFITS ================= -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ico" aria-hidden="true"><use href="#i-cap"/></svg> Applied benefits</div>
+    <h2 class="section-title">More reliable, more scalable and far cheaper than human raters</h2>
+    <p class="lead">Once validated, the metric changed what the research could afford to measure.</p>
+    <div class="ben">
+      <div class="b reveal">
+        <span class="k">Reliability</span>
+        <div class="n">Same response, same score</div>
+        <p>Scoring is deterministic, so there's no judge-to-judge disagreement. Even the human coders in this study started at only moderate agreement (κ = .58–.66).</p>
+      </div>
+      <div class="b reveal">
+        <span class="k">Scalability</span>
+        <div class="n">Every response, instantly</div>
+        <p>1,742 paraphrases scored with no raters and none lost to the method. One human method got a signal from as few as 4% of verb responses.</p>
+      </div>
+      <div class="b reveal">
+        <span class="k">Cost</span>
+        <div class="n">Free to run</div>
+        <p>The pretrained vectors cost nothing to use. Re-measuring one experiment with the human method took 77 paid online participants.</p>
+      </div>
+    </div>
+    <a class="xlink" href="verb-metaphor-case-study.html">For what the metric revealed about language, see the findings case study <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+
+<!-- ================= APPLICATIONS ================= -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg> Where it applies</div>
+    <h2 class="section-title">Turning people's words into trustworthy data</h2>
+    <p class="lead">The same approach, scoring text with embeddings and then validating the scores against people, carries over wherever open-ended responses need to become numbers.</p>
+    <div class="apps">
+      <div class="app reveal">
+        <div class="tags"><span class="tag pa">People analytics</span><span class="tag ux">UX research</span></div>
+        <h3>Checking how survey items are understood</h3>
+        <p>Ask respondents to restate an item in their own words, then score how far their reading drifts from the intended meaning: cognitive pretesting at scale.</p>
+      </div>
+      <div class="app reveal">
+        <div class="tags"><span class="tag pa">People analytics</span></div>
+        <h3>Open-text comments at scale</h3>
+        <p>Score engagement, pulse and exit-survey comments against theme descriptions instead of hand-coding thousands of responses.</p>
+      </div>
+      <div class="app reveal">
+        <div class="tags"><span class="tag ux">UX research</span></div>
+        <h3>Mental-model alignment</h3>
+        <p>Compare how users describe a feature or task with the product's own language to find where understanding breaks down.</p>
+      </div>
+      <div class="app reveal">
+        <div class="tags"><span class="tag pa">People analytics</span><span class="tag ux">UX research</span></div>
+        <h3>Tracking change over time</h3>
+        <p>Measure how the language around a topic, like career growth, onboarding or a new feature, shifts between survey waves or releases.</p>
+      </div>
+    </div>
+    <div class="thread reveal">
+      <span class="k">The common thread</span>
+      <p>Whether the scorer is an embedding model or an LLM, the validation steps here (replicate a known result, benchmark against human judgment, rule out confounds) are what make a new measure safe to act on.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="icon-row" aria-hidden="true">
+    <svg class="ico"><use href="#i-pencil"/></svg><svg class="ico"><use href="#i-book"/></svg><svg class="ico"><use href="#i-search"/></svg><svg class="ico"><use href="#i-flask"/></svg>
+  </div>
+  Automated Text Analysis Metric · Case Study · Daniel King<br>
+  <a href="King_Gentner_2021_Verb%20Metaphoric%20Extension%20Under%20Semantic%20Strain.pdf" target="_blank" rel="noopener">Read the full paper (PDF) ↗</a> &nbsp;·&nbsp; <a href="verb-metaphor-case-study.html">Findings case study</a> &nbsp;·&nbsp; <a href="index.html#portfolio">← Back to portfolio</a>
+</footer>
+
+<script>
+(function(){
+  document.body.classList.remove('no-js');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var narrowMQ = window.matchMedia('(max-width: 900px)');
+  var NS = 'http://www.w3.org/2000/svg';
+  var COL = { verb:'#D9534A', noun:'#0F9AA5', grid:'#ECEAE5', axis:'#C9C6BF', ink:'#46444F' };
+
+  function el(tag, attrs, parent){
+    var e = document.createElementNS(NS, tag);
+    for (var a in attrs){ if (attrs.hasOwnProperty(a)) e.setAttribute(a, attrs[a]); }
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function txt(parent, x, y, s, attrs){
+    var a = attrs || {}; a.x = x; a.y = y;
+    var t = el('text', a, parent); t.textContent = s; return t;
+  }
+  function debounce(fn, ms){ var t; return function(){ clearTimeout(t); t = setTimeout(fn, ms); }; }
+  function marker(parent, shape, x, y, color){
+    if (shape === 'dot') return el('circle', { cx:x, cy:y, r:4.5, fill:color, stroke:'#fff', 'stroke-width':2 }, parent);
+    var s = 5.2;
+    return el('path', { d:'M'+x+','+(y-s)+' L'+(x+s)+','+y+' L'+x+','+(y+s)+' L'+(x-s)+','+y+' Z', fill:color, stroke:'#fff', 'stroke-width':2, 'stroke-linejoin':'round' }, parent);
+  }
+  function fillTip(tip, title, rows){
+    tip.innerHTML = '';
+    var tt = document.createElement('div'); tt.className = 'tt'; tt.textContent = title; tip.appendChild(tt);
+    rows.forEach(function(rw){
+      var d = document.createElement('div'); d.className = 'row';
+      var k = document.createElement('span'); k.className = 'lk'; k.style.setProperty('--c', rw.c);
+      var b = document.createElement('b'); b.textContent = rw.v;
+      var n = document.createElement('span'); n.textContent = rw.n;
+      d.appendChild(k); d.appendChild(b); d.appendChild(n); tip.appendChild(d);
+    });
+  }
+
+  /* ---------- Check 3: two-panel convergent chart ---------- */
+  // Fitted endpoints read from the paper's Fig. 4 (word2vec, linear) and Fig. 5 (resurfacing, logistic)
+  var PANELS = [
+    { title:'The metric', sub:'word2vec similarity', subShort:'word2vec score', y0:.10, y1:.35, ticks:[.10,.20,.30], fmt:function(v){ return v.toFixed(2); }, logit:false,
+      series:[
+        { color:COL.noun, shape:'dot', label:'Noun · few',  y:[.293,.303] },
+        { color:COL.noun, shape:'dia', label:'Noun · many', y:[.269,.236] },
+        { color:COL.verb, shape:'dot', label:'Verb · few',  y:[.314,.200] },
+        { color:COL.verb, shape:'dia', label:'Verb · many', y:[.255,.157] } ] },
+    { title:'Human benchmark', sub:'chance the word came back', subShort:'word came back', y0:0, y1:.30, ticks:[0,.10,.20,.30], fmt:function(v){ return Math.round(v*100) + '%'; }, logit:true,
+      series:[
+        { color:COL.noun, shape:'dot', label:'Noun · few',  y:[.232,.216] },
+        { color:COL.noun, shape:'dia', label:'Noun · many', y:[.173,.150] },
+        { color:COL.verb, shape:'dot', label:'Verb · few',  y:[.165,.057] },
+        { color:COL.verb, shape:'dia', label:'Verb · many', y:[.085,.010] } ] }
+  ];
+  function lg(p){ return Math.log(p/(1-p)); }
+  function valAt(pn, sr, s){
+    if (!pn.logit) return sr.y[0] + (sr.y[1]-sr.y[0]) * s/7;
+    var l = lg(sr.y[0]) + (lg(sr.y[1]) - lg(sr.y[0])) * s/7;
+    return 1/(1+Math.exp(-l));
+  }
+  var cv = document.getElementById('cv');
+  var cvTip = document.createElement('div'); cvTip.className = 'tip'; cv.appendChild(cvTip);
+  function drawCV(){
+    var old = cv.querySelector('svg'); if (old) cv.removeChild(old);
+    var W = cv.clientWidth, H = cv.clientHeight; if (!W || !H) return;
+    var narrow = W < 560;
+    var m = { l: narrow ? 34 : 44, r: 8, t: narrow ? 34 : 40, b: 34 }, gap = narrow ? 42 : 60;
+    var pw = (W - m.l - m.r - gap) / 2, ph = H - m.t - m.b;
+    var svg = el('svg', { width:W, height:H, viewBox:'0 0 '+W+' '+H, role:'img',
+      'aria-label':'Two panels. Left, the word2vec metric: verb similarity falls as strain rises while noun similarity stays flat. Right, the human benchmark: the chance a verb came back falls as strain rises while nouns stay flat. In both, many-meaning words sit below few-meaning words.' });
+    cv.insertBefore(svg, cvTip);
+    PANELS.forEach(function(pn, pi){
+      var x0 = m.l + pi*(pw + gap);
+      var X = function(s){ return x0 + s/7*pw; };
+      var Y = function(v){ return m.t + (1 - (v - pn.y0)/(pn.y1 - pn.y0)) * ph; };
+      var g = el('g', { 'class': pi ? 'panel-b' : 'panel-a' }, svg);
+      txt(g, x0, narrow ? 12 : 14, pn.title, { 'class':'ptitle' });
+      txt(g, x0, narrow ? 25 : 29, narrow ? pn.subShort : pn.sub, { 'class':'psub' });
+      pn.ticks.forEach(function(v){
+        el('line', { x1:x0, x2:x0+pw, y1:Y(v), y2:Y(v), stroke:COL.grid, 'stroke-width':1 }, g);
+        txt(g, x0-6, Y(v)+4, pn.fmt(v), { 'text-anchor':'end', 'class':'tick' });
+      });
+      el('line', { x1:x0, x2:x0+pw, y1:m.t+ph, y2:m.t+ph, stroke:COL.axis, 'stroke-width':1 }, g);
+      txt(g, x0, m.t+ph+14, 'low', { 'class':'tick' });
+      txt(g, x0+pw, m.t+ph+14, 'high', { 'class':'tick', 'text-anchor':'end' });
+      txt(g, x0+pw/2, m.t+ph+28, 'Strain →', { 'class':'xtitle', 'text-anchor':'middle' });
+      pn.series.forEach(function(sr){
+        var sg = el('g', { 'class':'series' }, g);
+        var d = '';
+        for (var i = 0; i <= 28; i++){ var s = i/4; d += (i ? ' L' : 'M') + X(s).toFixed(1) + ',' + Y(valAt(pn, sr, s)).toFixed(1); }
+        el('path', { d:d, fill:'none', stroke:sr.color, 'stroke-width':2, 'stroke-linecap':'round', 'stroke-linejoin':'round' }, sg);
+        marker(sg, sr.shape, X(0), Y(sr.y[0]), sr.color);
+        marker(sg, sr.shape, X(7), Y(sr.y[1]), sr.color);
+      });
+      var an = el('g', { 'class':'poly-annot' }, g);
+      [[0,1,4.8],[2,3,2.2]].forEach(function(pr){
+        var s = pr[2];
+        var ya = Y(valAt(pn, pn.series[pr[0]], s)), yb = Y(valAt(pn, pn.series[pr[1]], s));
+        el('line', { x1:X(s), x2:X(s), y1:ya+6, y2:yb-6, stroke:COL.ink, 'stroke-width':1.2 }, an);
+        el('path', { d:'M'+(X(s)-3.5)+','+(yb-10)+' L'+X(s)+','+(yb-5)+' L'+(X(s)+3.5)+','+(yb-10), fill:'none', stroke:COL.ink, 'stroke-width':1.2 }, an);
+      });
+      txt(an, x0+pw/2, m.t+16, narrow ? 'many < few' : 'many-meaning words sit lower', { 'class':'annot', 'text-anchor':'middle' });
+
+      var cross = el('line', { y1:m.t, y2:m.t+ph, stroke:COL.ink, 'stroke-width':1, opacity:0 }, g);
+      var hit = el('rect', { x:x0, y:m.t, width:pw, height:ph, fill:'transparent' }, g);
+      hit.addEventListener('mousemove', function(ev){
+        if (pi === 1 && cv.getAttribute('data-step') === '0') return;
+        var r = svg.getBoundingClientRect();
+        var s = Math.max(0, Math.min(7, (ev.clientX - r.left - x0) / pw * 7));
+        s = Math.round(s*2)/2;
+        cross.setAttribute('x1', X(s)); cross.setAttribute('x2', X(s)); cross.setAttribute('opacity', .35);
+        var rows = pn.series.map(function(sr){ var v = valAt(pn, sr, s); return { c:sr.color, n:sr.label, raw:v, v:pn.fmt(v) }; })
+                            .sort(function(a,b){ return b.raw - a.raw; });
+        fillTip(cvTip, pn.title + ' · strain ' + s.toFixed(1), rows);
+        var tx = X(s) + 12; if (tx + cvTip.offsetWidth > W) tx = X(s) - 12 - cvTip.offsetWidth;
+        cvTip.style.left = Math.max(0, tx) + 'px'; cvTip.style.top = (m.t + 4) + 'px';
+        cvTip.classList.add('on');
+      });
+      hit.addEventListener('mouseleave', function(){ cross.setAttribute('opacity', 0); cvTip.classList.remove('on'); });
+    });
+  }
+  drawCV();
+  window.addEventListener('resize', debounce(drawCV, 150));
+  if (document.fonts && document.fonts.ready){ document.fonts.ready.then(drawCV); }
+
+  /* ---------- scrollytelling ---------- */
+  var sc = document.querySelector('.scrolly');
+  var steps = [].slice.call(sc.querySelectorAll('.step'));
+  var dotsEl = sc.querySelector('.dots');
+  var dots = steps.map(function(st, k){
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('aria-label', 'Go to build ' + (k+1) + ' of ' + steps.length);
+    b.addEventListener('click', function(){
+      var r = st.getBoundingClientRect();
+      var off = narrowMQ.matches ? window.innerHeight * 0.55 : window.innerHeight * 0.30;
+      window.scrollTo({ top: r.top + window.pageYOffset - off + 2, behavior: reduce ? 'auto' : 'smooth' });
+    });
+    dotsEl.appendChild(b);
+    return b;
+  });
+  var cur = -1;
+  function set(i){
+    if (i === cur) return;
+    cur = i;
+    cv.setAttribute('data-step', i);
+    steps.forEach(function(el, k){ el.classList.toggle('active', k === i); });
+    dots.forEach(function(el, k){ el.classList.toggle('on', k === i); });
+  }
+  function update(){
+    var thr = window.innerHeight * (narrowMQ.matches ? 0.72 : 0.55);
+    var idx = 0;
+    steps.forEach(function(st, k){ if (st.getBoundingClientRect().top < thr) idx = k; });
+    set(idx);
+  }
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if (!ticking){ ticking = true; requestAnimationFrame(function(){ update(); ticking = false; }); }
+  }, { passive:true });
+  window.addEventListener('resize', update);
+  update();
+
+  /* ---------- reveal + count-up ---------- */
+  function countUp(el){
+    var target = parseFloat(el.getAttribute('data-count'));
+    var fmt = function(v){ return Math.round(v).toLocaleString('en-US'); };
+    if (reduce){ el.textContent = fmt(target); return; }
+    var t0 = null, dur = 1200;
+    function tick(t){
+      if (!t0) t0 = t;
+      var p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(target * e);
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  var revealEls = [].slice.call(document.querySelectorAll('.reveal'));
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (!en.isIntersecting) return;
+        en.target.classList.add('in');
+        [].slice.call(en.target.querySelectorAll('[data-count]')).forEach(countUp);
+        io.unobserve(en.target);
+      });
+    }, { threshold:0.2 });
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('in'); });
+  }
+})();
+</script>
+</body>
+</html>

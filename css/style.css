@@ -354,3 +354,12 @@ color: #777;
 	font-size: 15px;
 	color: #666;
 }
+
+/* Portfolio thumbnails: all thumbnails are 3:2 (1200x800), so show them
+   full-bleed at their natural ratio instead of the 200px "contain" cap in bootstrap.css */
+.portfolio-item .img-responsive {
+	max-height: none;
+	height: auto;
+	aspect-ratio: 3 / 2;
+	object-fit: cover;
+}

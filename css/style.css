@@ -363,3 +363,20 @@ color: #777;
 	aspect-ratio: 3 / 2;
 	object-fit: cover;
 }
+
+/* bootstrap.css sets .col-sm-6 to width:200% (should be 50%), which blows portfolio
+   cards up to double the page width on tablet-sized screens (768-991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+	.col-sm-6 {
+		width: 50%;
+	}
+}
+
+/* Filter buttons: make links block-level so wrapped rows get proper spacing
+   instead of overlapping on narrower screens */
+ol.type li {
+	margin-bottom: 12px;
+}
+ol.type li a {
+	display: inline-block;
+}

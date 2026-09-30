@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mothers in Law Firms: Survey Case Study</title>
-<meta name="description" content="A survey of more than 1,000 Seattle-area lawyers, designed to separate the career cost of being a mother from the cost of being a woman, and to show which firm policies could keep mothers in private practice.">
+<title>Lawyer Survey — Case Study</title>
+<meta name="description" content="A survey of more than 1,000 lawyers, designed to separate the career cost of being a mother from the cost of being a woman, and to show which firm policies could keep mothers in private practice.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -41,7 +41,7 @@
   .hero .wrap{ position:relative; z-index:2; }
   .glyph-row{ display:flex; align-items:center; gap:.5em; font-size:1.3rem; color:var(--gold); opacity:.9; margin-bottom:22px; }
   .glyph-row .yrs{ font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; margin-left:.8em; color:rgba(243,240,234,.6); }
-  .hero h1{ font-size:clamp(2.2rem, 5vw, 3.2rem); line-height:1.12; letter-spacing:-0.01em; max-width:16ch; }
+  .hero h1{ font-size:clamp(2.2rem, 5vw, 3.2rem); line-height:1.12; letter-spacing:-0.01em; max-width:20ch; }
   .hero .hl{ color:var(--gold); font-style:italic; }
   .hero p.sub{ margin-top:18px; max-width:54ch; font-size:1.08rem; color:rgba(243,240,234,0.84); }
   .meta-row{ display:flex; flex-wrap:wrap; gap:18px 34px; margin-top:42px; padding-top:28px; border-top:1px solid rgba(243,240,234,0.18); }
@@ -71,6 +71,9 @@
   .pill-card h3{ font-size:1.02rem; margin-bottom:8px; color:var(--night); }
   .pill-card ul{ margin:0; padding-left:18px; }
   .pill-card li{ font-size:.93rem; color:#3a3e40; margin-bottom:6px; }
+  .pill-card.owned{ margin-top:28px; }
+  .pill-card.owned ul{ columns:2; column-gap:32px; }
+  @media (max-width:520px){ .pill-card.owned ul{ columns:1; } }
 
   /* flow */
   .flow{ display:grid; grid-template-columns:1fr auto 1fr auto 1.25fr; align-items:center; gap:10px; margin-top:30px; }
@@ -116,6 +119,12 @@
   .twins{ display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:6px; }
   @media (max-width:640px){ .twins{ grid-template-columns:1fr; gap:34px; } }
   .twin{ display:flex; flex-direction:column; align-items:center; text-align:center; }
+  /* keep the two grids aligned even when one title wraps to more lines: each twin spans 4 shared rows */
+  .twins{ grid-auto-rows:auto; row-gap:0; }
+  .twin{ display:grid; grid-row:span 4; grid-template-rows:subgrid; justify-items:center; align-content:start; }
+  .twin h4{ align-self:start; }
+  @media (max-width:640px){ .twin + .twin{ margin-top:34px; } }
+  .fig-title.fig-lede{ font-weight:400; line-height:1.5; margin-bottom:28px; }
   .twin .tag{ font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; font-weight:600; color:var(--accent); margin-bottom:4px; }
   .twin h4{ margin:0 0 14px; font-family:'Fraunces',serif; font-weight:600; font-size:1.02rem; color:var(--night); line-height:1.3; }
   .g22{ position:relative; display:grid; grid-template-columns:auto 92px 92px; grid-template-rows:auto 72px 72px; gap:6px; font-size:.72rem; color:var(--muted); }
@@ -211,11 +220,11 @@
 <header class="hero">
   <div class="wrap">
     <div class="glyph-row" aria-hidden="true"><svg class="ic"><use href="#i-case"/></svg><svg class="ic"><use href="#i-scale"/></svg><svg class="ic"><use href="#i-home"/></svg><span class="yrs">Survey research · 2022</span></div>
-    <h1>What parenthood <span class="hl">costs</span> a lawyer</h1>
+    <h1>What parenthood and gender cost a lawyer</h1>
     <p class="sub">A survey of 1,000+ Seattle-area lawyers that separates the career cost of being a mother from the cost of being a woman.</p>
     <div class="meta-row">
-      <div class="meta-item"><div class="label">My role</div><div class="val">Survey programming, fielding &amp; analysis</div></div>
-      <div class="meta-item"><div class="label">Client</div><div class="val">MAMA Seattle, via The Red Bee Group</div></div>
+      <div class="meta-item"><div class="label">My role</div><div class="val">Survey programming, fielding, analysis &amp; reporting</div></div>
+      <div class="meta-item"><div class="label">Client</div><div class="val">Attorney mothers' association, via a legal-industry research consultancy</div></div>
       <div class="meta-item"><div class="label">Sample</div><div class="val">1,020 lawyers · current &amp; former private practice</div></div>
       <div class="meta-item"><div class="label">Tools</div><div class="val">Qualtrics · R</div></div>
     </div>
@@ -228,13 +237,12 @@
 <section class="alt">
   <div class="wrap">
     <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-scale"/></svg> Key strengths</div>
-    <h2 class="section-title">What this case study shows about how I work</h2>
+    <h2 class="section-title">Research process highlights</h2>
     <ul class="tight">
-      <li><strong>I design the survey around the analysis.</strong> Every client question was mapped to survey items and a planned test before fielding.</li>
-      <li><strong>I separate causes that travel together.</strong> A gender × parenthood model pulled apart effects that simple comparisons would have mixed together.</li>
-      <li><strong>I turn many tables into a few messages.</strong> More than 60 tables became four findings that fed a published report.</li>
+      <li><strong>Starting with the end in mind.</strong> When building the questionnaire, every client question was designed with the appropriate final statistical test to answer it in mind.</li>
+      <li><strong>Always looking for interactions.</strong> A gender × parenthood model pulled apart effects that simple averages would have obscured. While being a parent affects both men and women, it sometimes affects women more when it comes to the workplace.</li>
+      <li><strong>Avoiding confounds.</strong> Age was an important control when analyzing the effects of parenthood on career outcomes.</li>
     </ul>
-    <p class="note">Consulting work under The Red Bee Group's principals, who wrote the <a href="https://mamaseattle.org/project/report-on-mothers-in-law-firms/" target="_blank" rel="noopener">final report</a> (MAMA Seattle, 2023). The sample is self-selected and unweighted.</p>
   </div>
 </section>
 
@@ -243,25 +251,16 @@
   <div class="wrap">
     <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-case"/></svg> The question</div>
     <h2 class="section-title">Why do mothers leave private practice, and what would keep them?</h2>
-    <p class="lead">MAMA Seattle wanted evidence for law firm leaders: which obstacles come from parenting, which come from gender, and which policies would help.</p>
-    <div class="two-col">
-      <div class="pill-card">
-        <h3>What I owned</h3>
-        <ul>
-          <li>Qualtrics programming and fielding</li>
-          <li>Cleaning and derived variables</li>
-          <li>Analysis plan, testing and memo</li>
-          <li>Follow-up analyses</li>
-        </ul>
-      </div>
-      <div class="pill-card">
-        <h3>What I shaped</h3>
-        <ul>
-          <li>Question wording and structure</li>
-          <li>Branching for current vs. former lawyers</li>
-          <li>Which comparisons to run</li>
-        </ul>
-      </div>
+    <p class="lead">A regional association of attorney mothers wanted evidence for firm leaders: which obstacles come from parenting, which come from gender, where do the two compound, and which policies would help?</p>
+    <div class="pill-card owned">
+      <h3>What I owned</h3>
+      <ul>
+        <li>Questionnaire design</li>
+        <li>Qualtrics programming and fielding</li>
+        <li>Data cleaning</li>
+        <li>Plan for statistical analysis</li>
+        <li>Analysis and reporting</li>
+      </ul>
     </div>
   </div>
 </section>
@@ -270,35 +269,23 @@
 <section class="alt">
   <div class="wrap">
     <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg> Approach</div>
-    <h2 class="section-title">One survey, two paths, one analytical lens</h2>
-
-    <div class="flow reveal" role="img" aria-label="Survey flow: an email list and a QR code in bar publications led to 1,159 responses. A screener sent lawyers currently in private practice and lawyers who had left it to separate question paths. Lawyers who never practiced privately exited, leaving 1,020 in the analysis.">
-      <div class="box"><b>Invite</b>~11,000 lawyers by email, plus a QR code in bar publications</div>
-      <span class="arrow" aria-hidden="true">→</span>
-      <div class="box"><b>Screen</b>Ever worked in private practice?</div>
-      <span class="arrow" aria-hidden="true">→</span>
-      <div class="split">
-        <div class="box"><b>Current</b>Their firm today</div>
-        <div class="box"><b>Former</b>Why and when they left</div>
-        <div class="box exit">Never: survey ends</div>
-      </div>
-    </div>
+    <h2 class="section-title">Research design</h2>
 
     <div class="method-row">
       <div class="method-card reveal">
         <span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg></span>
-        <h3>Shape the instrument</h3>
+        <h3>Questionnaire logic</h3>
         <p>Wording, scales and skip logic built to support planned tests.</p>
       </div>
       <div class="method-card reveal">
         <span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg></span>
-        <h3>Field it</h3>
-        <p>Qualtrics, pretested, three weeks in the field.</p>
+        <h3>Fielding</h3>
+        <p>Qualtrics, pretested, three weeks in the field. ~11,000 lawyers by email, plus a QR code in bar publications.</p>
       </div>
       <div class="method-card reveal">
         <span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg></span>
-        <h3>Model it</h3>
-        <p>Analysis plan agreed up front; an R pipeline modeled every question.</p>
+        <h3>Analysis</h3>
+        <p>A custom R pipeline modeled every question.</p>
       </div>
     </div>
 
@@ -309,7 +296,7 @@
         <span class="rh">Men</span><span class="cell k" style="--c:var(--men)">Fathers</span><span class="cell" style="--c:var(--men)">Men without children</span>
       </div>
       <div>
-        <p><strong>The core design: gender × parenthood.</strong> Comparing all four groups separates being a woman from raising children, and shows when children affect women and men differently.</p>
+        <p><strong>The core design: gender × parenthood.</strong> Comparing all four groups separates being a woman from raising children, while revealing whenever having children affects women and men differently.</p>
         <p>Logistic or linear models by question type, with age controlled where it could confound.</p>
       </div>
     </div>
@@ -320,14 +307,12 @@
 <section>
   <div class="wrap">
     <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg> Finding 1</div>
-    <h2 class="section-title">Two different problems: a parenting load and a gender penalty</h2>
-    <p class="lead">Some strains hit all parents. Others hit all women, with or without children. They need different fixes.</p>
+    <h2 class="section-title">Parental status and gender interact to shape lawyers' experiences</h2>
+    <p class="lead">Some strains hit all parents. Others hit primarily women, with or without children. But some penalized women with children more than men. </p>
     <figure class="fig reveal" style="margin-left:0;margin-right:0">
-      <div class="fig-title">One problem follows parenthood, the other follows gender</div>
-      <div class="fig-sub">Share of current private-practice lawyers. Darker = more common.</div>
+      <div class="fig-title fig-lede">Parents of both genders found family obligations disrupted their work, but the penalty was stronger for mothers than for fathers. Women felt perceived as less competent than men, regardless of parental status.</div>
       <div class="twins" id="twins"></div>
       <div class="scale" aria-hidden="true">Less common <i></i> More common</div>
-      <div class="fig-foot">Same split for other items: lost sleep followed parenthood; sponsor access and raises followed gender.</div>
     </figure>
   </div>
 </section>
@@ -337,7 +322,7 @@
   <div class="wrap">
     <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg> Finding 2</div>
     <h2 class="section-title">At home, mothers are still the default parent</h2>
-    <p class="lead">Mothers far more often said they handle childcare alone; fathers more often called it shared.</p>
+    <p class="lead">Mothers were far more likely to report that they handle childcare alone; fathers more often described responsibilities as shared.</p>
     <figure class="fig reveal" style="margin-left:0;margin-right:0">
       <div class="fig-title">"I am primarily responsible for…"</div>
       <div class="fig-sub">Parents currently in private practice who live with dependent children</div>
@@ -355,7 +340,7 @@
   <div class="wrap wide">
     <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg> Finding 3</div>
     <h2 class="section-title">Children push mothers' and fathers' careers in opposite directions</h2>
-    <p class="lead">Compared with peers without children, fathers work more and want part-time less; mothers show the opposite. Averaging across genders would hide this.</p>
+    <p class="lead">Compared with peers without children, fathers work more and want part-time less; mothers show the opposite inclination.</p>
     <figure class="fig reveal" style="margin-left:0;margin-right:0">
       <div class="fig-title">How having children changes each outcome, for women and for men</div>
       <div class="fig-sub">Share of lawyers currently in private practice, without vs. with dependent children</div>
@@ -374,7 +359,7 @@
   <div class="wrap">
     <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-case"/></svg> Finding 4 · A follow-up analysis</div>
     <h2 class="section-title">What keeps mothers at a firm depends on the firm's size</h2>
-    <p class="lead">A follow-up I ran for the client: small firms keep mothers with time, large firms with career. It became its own section of the published report.</p>
+    <p class="lead">Small firms keep mothers with time, large firms with career.</p>
     <figure class="fig reveal" style="margin-left:0;margin-right:0">
       <div class="fig-title">Where each reason to stay is stronger, among mothers</div>
       <div class="fig-sub">Share naming each a reason to stay: large firms (50+ lawyers) minus small firms</div>
@@ -388,7 +373,7 @@
 <section>
   <div class="wrap">
     <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg> Rigor</div>
-    <h2 class="section-title">The finding I didn't report</h2>
+    <h2 class="section-title">Controlling for confounds</h2>
     <div class="held reveal">
       <div>
         <div class="label">What the raw tables showed</div>
@@ -408,12 +393,12 @@
   <div class="wrap">
     <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg> From findings to action</div>
     <h2 class="section-title">Where firm policy and mothers' priorities diverge</h2>
-    <p class="lead">Paid leave and flexibility are shared basics. Changes to how firms count hours and give credit matter to mothers but far less to fathers, so that is where the case has to be made.</p>
+    <p class="lead">The desire for paid leave and flexible hours are shared across genders, but changes to how firms count hours and give credit matter to far more to mothers than fathers.</p>
     <figure class="fig reveal" style="margin-left:0;margin-right:0">
-      <div class="fig-title">28 retention strategies: importance to mothers vs. the mother–father gap</div>
+      <div class="fig-title">Retention strategies differ by gender: the mother–father gap</div>
       <div class="fig-sub">Share of parents rating each strategy "very important"</div>
       <div class="svgbox" id="matrix"></div>
-      <div class="fig-foot">Hover for details. Dividers are visual guides, not statistical cutoffs.</div>
+      <div class="fig-foot" style="margin-top:22px">Hover for details. Dividers are visual guides, not statistical cutoffs.</div>
     </figure>
 
     <div class="recs">
@@ -430,27 +415,12 @@
         <div><span class="k">What the report recommends</span><p>Tailor retention strategy to the firm</p></div>
       </div>
     </div>
-    <p class="note">Paraphrased from the <a href="https://mamaseattle.org/wp-content/uploads/2023/10/MAMA-Seattle-Report-PUBLICATION-COPY-APRIL-19-2023.pdf" target="_blank" rel="noopener">published report</a>.</p>
-  </div>
-</section>
-
-<!-- ================= NEXT ================= -->
-<section>
-  <div class="wrap">
-    <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg> Looking back</div>
-    <h2 class="section-title">What I'd do differently</h2>
-    <ul class="tight">
-      <li><strong>Weight the sample</strong> to bar demographics, since respondents self-selected.</li>
-      <li><strong>Correct for multiple comparisons</strong> across hundreds of tests.</li>
-      <li><strong>Lead with effect sizes</strong> and confidence intervals, not p-values.</li>
-      <li><strong>Track people over time</strong> instead of comparing those who stayed with those who left.</li>
-    </ul>
   </div>
 </section>
 
 <footer>
   <div class="glyph-row" aria-hidden="true"><svg class="ic"><use href="#i-case"/></svg><svg class="ic"><use href="#i-scale"/></svg><svg class="ic"><use href="#i-home"/></svg></div>
-  Mothers in Law Firms · Case Study · Daniel King<br>
+  Parenthood &amp; Legal Careers · Case Study · Daniel King<br>
   <a href="index.html#portfolio">← Back to portfolio</a>
 </footer>
 
@@ -485,7 +455,7 @@
   // values: [mothers, women w/o dep. children, fathers, men w/o dep. children]
   var twins = [
     {tag:'Parenting load', q:'Family obligations often disrupt my work', v:[43.26, 12.00, 33.33, 14.81], ring:'col',
-     cap:'<b>Parents ≈ 3× non-parents</b>, mothers and fathers alike.'},
+     cap:'<b>Parents ≈ 3× non-parents</b>, with mothers 10% more likely than fathers.'},
     {tag:'Gender penalty', q:'I felt perceived as less competent', v:[34.84, 39.26, 11.36, 13.11], ring:'row',
      cap:'<b>Women ≈ 3× men</b>, with or without children.'}
   ];
@@ -669,13 +639,37 @@
       var tx = el('text', {x:x(v), y:H - B + 18, 'text-anchor':'middle', 'font-size':11, fill:'#8a9094'}, svg); tx.textContent = v + '%';
     });
     var xl = el('text', {x:(L + W - R)/2, y:H - 6, 'text-anchor':'middle', 'font-size':11.5, fill:'#5a6064'}, svg); xl.textContent = 'Mothers rating it "very important" →';
-    var yl = el('text', {x:12, y:(T + H - B)/2, 'text-anchor':'middle', 'font-size':11.5, fill:'#5a6064', transform:'rotate(-90 12 ' + ((T + H - B)/2) + ')'}, svg); yl.textContent = 'Mothers minus fathers (pts) →';
+    var yl = el('text', {x:12, y:(T + H - B)/2, 'text-anchor':'middle', 'font-size':11.5, fill:'#5a6064', transform:'rotate(-90 12 ' + ((T + H - B)/2) + ')'}, svg); yl.textContent = 'More important to mothers than fathers →';
     // quadrant dividers
+    // light shading to emphasize the upper-right quadrant
+    el('rect', {x:x(60), y:T, width:(W - R) - x(60), height:y(15) - T, fill:'rgba(47,111,115,0.07)'}, svg);
     el('line', {x1:x(60), x2:x(60), y1:T, y2:H - B, stroke:'rgba(28,31,33,.28)'}, svg);
-    el('line', {x1:L, x2:W - R, y1:y(20), y2:y(20), stroke:'rgba(28,31,33,.28)'}, svg);
-    var q1 = el('text', {x:x(60) + 8, y:T + 12, 'text-anchor':'start', 'font-size':10.5, 'font-weight':600, 'letter-spacing':'.06em', fill:'var(--accent)'}, svg); q1.textContent = 'MOTHERS’ PRIORITIES, UNDERVALUED BY FATHERS';
-    var q2 = el('text', {x:W - R - 4, y:H - B - 8, 'text-anchor':'end', 'font-size':10.5, 'font-weight':600, 'letter-spacing':'.06em', fill:'#80868a'}, svg); q2.textContent = 'SHARED BASICS';
-    if (x(60) + 8 + q1.getComputedTextLength() > W - R - 2){ q1.textContent = 'UNDERVALUED BY FATHERS'; if (x(60) + 8 + q1.getComputedTextLength() > W - R - 2){ q1.setAttribute('x', W - R - 2); q1.setAttribute('text-anchor', 'end'); } }
+    el('line', {x1:L, x2:W - R, y1:y(15), y2:y(15), stroke:'rgba(28,31,33,.28)'}, svg);
+    var q1 = el('text', {x:W - R, y:T + 14, 'text-anchor':'end', 'font-size':10.5, 'font-weight':600, 'letter-spacing':'.06em', fill:'var(--accent)'}, svg); q1.textContent = 'VALUED MORE BY MOTHERS THAN FATHERS';
+    var q2 = el('text', {x:W - R, y:H - B - 8, 'text-anchor':'end', 'font-size':10.5, 'font-weight':600, 'letter-spacing':'.06em', fill:'#80868a'}, svg); q2.textContent = 'VALUED SIMILARLY BY MOTHERS AND FATHERS';
+    // wrap a quadrant label onto two lines when it doesn't fit its quadrant
+    // greedy word wrap; up=true grows the label upward from its baseline
+    function wrapLabel(t, maxW, up){
+      if (t.getComputedTextLength() <= maxW) return;
+      var words = t.textContent.split(' '), x0 = t.getAttribute('x'), lines = [], cur = '';
+      t.textContent = '';
+      var probe = el('tspan', {x:x0}, t);
+      words.forEach(function(w){
+        var test = cur ? cur + ' ' + w : w;
+        probe.textContent = test;
+        if (probe.getComputedTextLength() > maxW && cur){ lines.push(cur); cur = w; } else { cur = test; }
+      });
+      lines.push(cur); t.removeChild(probe);
+      lines.forEach(function(line, i){
+        var sp = el('tspan', {x:x0, dy: i === 0 ? (up ? (-(lines.length - 1) * 1.25) + 'em' : 0) : '1.25em'}, t);
+        sp.textContent = line;
+      });
+    }
+    if (W < 520){ [q1, q2].forEach(function(q){ q.setAttribute('font-size', 9.5); q.setAttribute('letter-spacing', '.03em'); }); }
+    // on narrow screens let labels run left past the divider so they stay on one or two lines
+    var qMax = W < 520 ? (W - R) - (L + 10) : (W - R) - (x(60) + 8);
+    wrapLabel(q2, qMax, true);
+    wrapLabel(q1, qMax, false);
     var hl = [], rest = [];
     strat.forEach(function(s){ (labelled[s[0]] ? hl : rest).push(s); });
     rest.concat(hl).forEach(function(s){

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campus Belonging: Survey Case Study</title>
+<meta name="description" content="A campus climate survey of 1,300+ students, alumni, faculty and staff at a private university, built to show which groups experience the campus differently, and on what.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#23343B;
+    --night-dark:#162328;
+    --cream:#F3F0EA;
+    --paper:#FDFBF8;
+    --ink:#1C1F21;
+    --muted:#4A4F52;
+    --accent:#2F6F73;
+    --gold:#E2B458;
+    --line:rgba(28,31,33,0.12);
+    /* chart colors (validated: CVD + contrast pass on light surface) */
+    --disagree:#B8573A; --agree:#1A7FA8; --neutral:#C9CED0;
+    --poc:#6E56A0; --white:#A8741C;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; font-size:16px; line-height:1.6; }
+  h1,h2,h3{ font-family:'Fraunces',serif; font-weight:600; margin:0; }
+  strong{ font-weight:600; }
+  a{ color:var(--accent); }
+  .wrap{ max-width:760px; margin:0 auto; padding:0 28px; }
+  @media (max-width:520px){ .wrap{ padding:0 16px; } }
+  .eyebrow{ display:flex; align-items:center; gap:.5em; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); font-weight:600; margin-bottom:.9rem; }
+  .ic{ width:1em; height:1em; fill:currentColor; display:inline-block; vertical-align:-0.12em; flex:none; }
+
+  /* ---------- HERO ---------- */
+  .hero{ background:radial-gradient(120% 140% at 15% -10%, #3E5A63 0%, var(--night) 45%, var(--night-dark) 100%); color:var(--cream); padding:88px 0 76px; position:relative; overflow:hidden; }
+  .hero .wrap{ position:relative; z-index:2; }
+  .glyph-row{ display:flex; align-items:center; gap:.5em; font-size:1.3rem; color:var(--gold); opacity:.9; margin-bottom:22px; }
+  .glyph-row .yrs{ font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; margin-left:.8em; color:rgba(243,240,234,.6); }
+  .hero h1{ font-size:clamp(2.2rem, 5vw, 3.2rem); line-height:1.12; letter-spacing:-0.01em; max-width:16ch; }
+  .hero .hl{ color:var(--gold); font-style:italic; }
+  .hero p.sub{ margin-top:18px; max-width:54ch; font-size:1.08rem; color:rgba(243,240,234,0.84); }
+  .meta-row{ display:flex; flex-wrap:wrap; gap:18px 34px; margin-top:42px; padding-top:28px; border-top:1px solid rgba(243,240,234,0.18); }
+  .meta-item .label{ font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:4px; }
+  .meta-item .val{ font-size:.92rem; color:var(--cream); }
+  .map-deco{ position:absolute; right:64px; bottom:70px; z-index:1; display:grid; grid-template-columns:repeat(3, 40px); gap:6px; }
+  .map-deco span{ height:40px; border-radius:8px; border:2px dashed rgba(243,240,234,.28); }
+  .map-deco span.s{ border:0; }
+  .map-cap{ position:absolute; right:64px; bottom:40px; z-index:1; font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:rgba(243,240,234,.55); text-align:right; }
+  @media (max-width:1100px){ .map-deco, .map-cap{ display:none; } }
+
+  /* ---------- SECTIONS ---------- */
+  section{ padding:64px 0; }
+  section.alt{ background:var(--cream); }
+  .section-title{ font-size:1.7rem; margin-bottom:14px; line-height:1.25; }
+  .lead{ font-size:1.05rem; color:var(--muted); max-width:62ch; margin:0 0 1rem; }
+  ul.tight{ margin:14px 0 0; padding-left:20px; }
+  ul.tight li{ font-size:.96rem; margin-bottom:10px; color:#3a3e40; max-width:64ch; }
+  .note{ font-size:.82rem; color:#80868a; margin-top:28px; border-top:1px dashed var(--line); padding-top:16px; }
+
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:28px; }
+  @media (max-width:640px){ .two-col{ grid-template-columns:1fr; } }
+  .pill-card{ background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:20px 22px; }
+  .pill-card h3{ font-size:1.02rem; margin-bottom:8px; color:var(--night); }
+  .pill-card ul{ margin:0; padding-left:18px; }
+  .pill-card li{ font-size:.93rem; color:#3a3e40; margin-bottom:6px; }
+
+  /* flow */
+  .flow{ display:grid; grid-template-columns:1fr auto 1fr auto 1fr auto 1.1fr; align-items:center; gap:10px; margin-top:30px; }
+  .flow .box{ background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:14px 16px; font-size:.86rem; color:var(--muted); }
+  .flow .box b{ display:block; font-family:'Fraunces',serif; font-weight:600; font-size:1.02rem; color:var(--night); margin-bottom:2px; }
+  .flow .arrow{ color:var(--accent); font-size:1.2rem; }
+  .flow .split{ display:grid; gap:6px; }
+  .flow .split .box{ padding:7px 12px; display:flex; justify-content:space-between; gap:10px; font-size:.82rem; }
+  .flow .split .box b{ display:inline; font-size:.9rem; margin:0; }
+  @media (max-width:760px){ .flow{ grid-template-columns:1fr; } .flow .arrow{ transform:rotate(90deg); justify-self:center; } }
+
+  .method-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:26px; }
+  @media (max-width:760px){ .method-row{ grid-template-columns:1fr; } }
+  .method-card{ padding:24px; border-radius:12px; background:var(--night); color:var(--cream); }
+  .method-card .glyph{ font-size:1.4rem; color:var(--gold); display:block; margin-bottom:10px; }
+  .method-card h3{ font-size:1rem; margin-bottom:6px; color:var(--cream); }
+  .method-card p{ font-size:.87rem; color:rgba(243,240,234,0.8); margin:0; }
+
+  /* ---------- CHARTS ---------- */
+  .fig{ margin:30px 0 0; background:#fff; border:1px solid var(--line); border-radius:14px; padding:22px 22px 18px; box-shadow:0 10px 30px rgba(35,52,59,.06); }
+  @media (max-width:520px){ .fig{ padding:16px 12px 14px; } }
+  .fig-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1rem; color:var(--night); margin-bottom:4px; }
+  .fig-sub{ font-size:.8rem; color:#80868a; margin-bottom:14px; }
+  .legend{ display:flex; flex-wrap:wrap; gap:6px 16px; font-size:.8rem; color:var(--muted); margin-bottom:14px; align-items:center; }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; }
+  .mk{ width:11px; height:11px; border-radius:3px; background:var(--c); display:inline-block; }
+  .fig-foot{ font-size:.76rem; color:#8a9094; margin-top:12px; }
+
+  /* gap map */
+  .gm{ display:grid; grid-template-columns:minmax(118px, 1.5fr) repeat(3, minmax(54px, 1fr)); gap:5px; font-size:.84rem; }
+  .gm .ch{ font-size:.74rem; font-weight:600; color:var(--night); text-align:center; line-height:1.25; align-self:end; padding-bottom:4px; }
+  .gm .ch span{ display:block; font-weight:400; color:#80868a; }
+  .gm .sec{ grid-column:1 / -1; font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; font-weight:600; color:var(--accent); padding:12px 0 2px; border-top:1px solid var(--line); margin-top:4px; }
+  .gm .sec.first{ border-top:0; margin-top:0; padding-top:4px; }
+  .gm .rl{ color:#3a3e40; line-height:1.3; align-self:center; padding-right:6px; }
+  .gm .cell{ height:36px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-weight:600; font-variant-numeric:tabular-nums; cursor:default; font-size:.86rem; }
+  .gm .cell.ns{ background:#fff; border:1.5px dashed #C5CBCD; color:#9aa0a3; font-weight:500; }
+  .gm-key{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 18px; margin-top:16px; font-size:.74rem; color:#80868a; }
+  .gm-key .sw{ display:inline-block; width:22px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:6px; }
+  .gm-key .ramp{ display:inline-block; width:110px; height:10px; border-radius:4px; background:linear-gradient(90deg, #F5E2DA, #93391F); vertical-align:-1px; margin:0 6px; }
+  @media (max-width:520px){ .gm{ font-size:.78rem; grid-template-columns:minmax(100px, 1.4fr) repeat(3, minmax(46px, 1fr)); } .gm .cell{ font-size:.8rem; } }
+
+  /* stacked 100% bars */
+  .sb-group + .sb-group{ margin-top:14px; }
+  .sb-row{ display:grid; grid-template-columns:118px 1fr; gap:12px; align-items:center; padding:4px 0; }
+  .sb-label{ font-size:.86rem; color:#3a3e40; text-align:right; }
+  .sb-bar{ display:flex; gap:2px; height:26px; }
+  .sb-seg{ background:var(--c); display:flex; align-items:center; font-size:.76rem; font-weight:600; color:#fff; font-variant-numeric:tabular-nums; cursor:default; overflow:hidden; white-space:nowrap; }
+  .sb-seg.l{ border-radius:4px 0 0 4px; padding-left:8px; }
+  .sb-seg.r{ border-radius:0 4px 4px 0; justify-content:flex-end; padding-right:8px; }
+  .sb-seg.m{ color:#4a4f52; justify-content:center; font-weight:500; }
+  @media (max-width:520px){ .sb-row{ grid-template-columns:1fr; gap:3px; } .sb-label{ text-align:left; } }
+
+  /* paired bars */
+  .pb-row{ display:grid; grid-template-columns:minmax(120px, 36%) 1fr; gap:14px; align-items:center; padding:10px 0; }
+  .pb-row + .pb-row{ border-top:1px solid var(--line); }
+  .pb-label{ font-size:.88rem; color:#3a3e40; line-height:1.35; }
+  .pb-bars{ display:grid; gap:4px; }
+  .pb-line{ display:flex; align-items:center; gap:8px; }
+  .pb-bar{ height:14px; border-radius:0 4px 4px 0; background:var(--c); min-width:2px; cursor:default; }
+  .pb-val{ font-size:.78rem; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  @media (max-width:520px){ .pb-row{ grid-template-columns:1fr; gap:6px; } }
+
+  #tip{ position:fixed; z-index:60; pointer-events:none; background:var(--night-dark); color:var(--cream); font-size:.8rem; line-height:1.4; padding:8px 11px; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.2); max-width:270px; opacity:0; transition:opacity .12s; }
+  #tip.on{ opacity:1; }
+  #tip b{ font-weight:600; color:#fff; }
+  #tip .dim{ color:rgba(243,240,234,.65); }
+
+  /* held back */
+  .held{ margin-top:26px; background:var(--night); color:var(--cream); border-radius:16px; padding:30px 32px; display:grid; grid-template-columns:1fr 1fr; gap:26px; }
+  @media (max-width:640px){ .held{ grid-template-columns:1fr; padding:24px; } }
+  .held .label{ font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); margin-bottom:8px; }
+  .held p{ margin:0; font-size:.94rem; color:rgba(243,240,234,.85); }
+  .held .big{ font-family:'Fraunces',serif; font-size:1.3rem; color:var(--cream); line-height:1.3; margin-bottom:8px; }
+
+  footer{ background:var(--night-dark); color:rgba(243,240,234,0.6); text-align:center; padding:40px 0; font-size:.84rem; }
+  footer .glyph-row{ justify-content:center; margin-bottom:12px; font-size:1rem; }
+  footer a{ color:var(--gold); text-decoration:none; }
+  footer a:hover{ text-decoration:underline; }
+
+  .reveal{ opacity:0; transform:translateY(14px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.in{ opacity:1; transform:none; }
+  .no-js .reveal{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } .reveal{ opacity:1; transform:none; transition:none; } }
+</style>
+</head>
+<body class="no-js">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-people" viewBox="0 0 24 24"><path d="M8.5 4a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7zm8 1.5a3 3 0 1 1 0 6 3 3 0 0 1 0-6zM2 19c0-3.3 2.9-6 6.5-6s6.5 2.7 6.5 6v1H2zm14.5-6c3 0 5.5 2.2 5.5 5v1h-5v-1c0-1.9-.7-3.6-1.9-4.9.5-.1.9-.1 1.4-.1z"/></symbol>
+  <symbol id="i-hall" viewBox="0 0 24 24"><path d="M12 2l10 5v2H2V7zM4 10h3v8H4zm6.5 0h3v8h-3zM17 10h3v8h-3zM2 19h20v3H2z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M4 5h2.5v2.5H4zm5 .3h11v2H9zM4 10.8h2.5v2.5H4zm5 .2h11v2H9zm-5 5.8h2.5v2.5H4zm5 .2h11v2H9z"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M2.5 11.2L21.5 3l-6.8 18.5-3.6-7.6zm5 .3l4.8 1.9 1.9 4.6 3.6-10.1z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M12 5c5 0 8.7 3.6 10 7-1.3 3.4-5 7-10 7S3.3 15.4 2 12c1.3-3.4 5-7 10-7zm0 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 2.2a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6z"/></symbol>
+</svg>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="wrap">
+    <div class="glyph-row" aria-hidden="true"><svg class="ic"><use href="#i-hall"/></svg><svg class="ic"><use href="#i-people"/></svg><svg class="ic"><use href="#i-grid"/></svg><span class="yrs">Survey research · 2022</span></div>
+    <h1>Who feels they <span class="hl">belong</span> on campus?</h1>
+    <p class="sub">A campus climate survey of 1,300+ students, alumni, faculty and staff, built to show which groups experience the university differently, and on what.</p>
+    <div class="meta-row">
+      <div class="meta-item"><div class="label">My role</div><div class="val">Survey programming, fielding &amp; analysis</div></div>
+      <div class="meta-item"><div class="label">Client</div><div class="val">A private university, via a research consultancy</div></div>
+      <div class="meta-item"><div class="label">Sample</div><div class="val">1,316 respondents · four campus roles</div></div>
+      <div class="meta-item"><div class="label">Tools</div><div class="val">Qualtrics · R</div></div>
+    </div>
+  </div>
+  <div class="map-deco" aria-hidden="true">
+    <span></span><span class="s" style="background:#C4674A"></span><span class="s" style="background:#93391F"></span>
+    <span></span><span></span><span class="s" style="background:#B8573A"></span>
+    <span class="s" style="background:#E3A58F"></span><span class="s" style="background:#C4674A"></span><span></span>
+  </div>
+  <div class="map-cap" aria-hidden="true">Gender · race · disability</div>
+</header>
+
+<!-- ================= KEY STRENGTHS ================= -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg> Key strengths</div>
+    <h2 class="section-title">What this case study shows about how I work</h2>
+    <ul class="tight">
+      <li><strong>I build one instrument for many audiences.</strong> Role-based wording and branching kept a single survey valid for students, alumni, faculty, staff and administrators.</li>
+      <li><strong>I check what "no difference" is hiding.</strong> When agreement looked equal across groups, I tested the other end of the scale and found the gap.</li>
+      <li><strong>I know what a sample can't support.</strong> Small groups were reported descriptively, not dressed up with significance tests.</li>
+    </ul>
+    <p class="note">Consulting work under a research consultancy's principals, who owned the client relationship and final report. The sample is self-selected (8% response) and unweighted; its racial mix roughly matched the campus population.</p>
+  </div>
+</section>
+
+<!-- ================= THE QUESTION ================= -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-hall"/></svg> The question</div>
+    <h2 class="section-title">Do experiences of campus differ by gender, race or disability, and where?</h2>
+    <p class="lead">University leadership wanted a baseline on diversity, equity, inclusion and belonging before setting new strategy, covering bias, belonging, views of the institution and overall satisfaction.</p>
+    <div class="two-col">
+      <div class="pill-card">
+        <h3>What I owned</h3>
+        <ul>
+          <li>Qualtrics programming, piping and testing</li>
+          <li>Fielding and email distribution</li>
+          <li>Cleaning, recoding and analysis plan</li>
+          <li>Significance testing and the analysis memo</li>
+        </ul>
+      </div>
+      <div class="pill-card">
+        <h3>What I shaped</h3>
+        <ul>
+          <li>Question wording and structure</li>
+          <li>Role-specific wording, including alumni</li>
+          <li>Follow-up loops for each reported incident</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= APPROACH ================= -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg> Approach</div>
+    <h2 class="section-title">One week in the field, three comparisons on every question</h2>
+
+    <div class="flow reveal" role="img" aria-label="Survey flow: about 16,000 people were invited by email. The survey ran for one week and drew 1,316 responses, an 8 percent response rate: 791 students and alumni, 238 faculty, 201 senior administrators and 86 staff.">
+      <div class="box"><b>Invite</b>~16,000 students, alumni and employees by email</div>
+      <span class="arrow" aria-hidden="true">→</span>
+      <div class="box"><b>Field</b>Pretested; one week live</div>
+      <span class="arrow" aria-hidden="true">→</span>
+      <div class="box"><b>1,316</b>responses (8%)</div>
+      <span class="arrow" aria-hidden="true">→</span>
+      <div class="split">
+        <div class="box"><b>Students &amp; alumni</b>791</div>
+        <div class="box"><b>Faculty</b>238</div>
+        <div class="box"><b>Senior admin</b>201</div>
+        <div class="box"><b>Staff</b>86</div>
+      </div>
+    </div>
+
+    <div class="method-row">
+      <div class="method-card reveal">
+        <span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg></span>
+        <h3>Shape the instrument</h3>
+        <p>Wording piped by role; every reported incident triggered "where" and "who" follow-ups.</p>
+      </div>
+      <div class="method-card reveal">
+        <span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-send"/></svg></span>
+        <h3>Field it</h3>
+        <p>Pretest and piping checks, then a one-week launch. Bounced addresses were fixed and re-sent.</p>
+      </div>
+      <div class="method-card reveal">
+        <span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg></span>
+        <h3>Model it</h3>
+        <p>Each question modeled by gender, race and disability at α = .01, cross-checked with a second specification.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FINDING 1 ================= -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-grid"/></svg> Finding 1</div>
+    <h2 class="section-title">Race and disability gaps ran through everything; gender gaps were rare</h2>
+    <p class="lead">Race gaps showed up in bias, belonging and bottom-line views. The largest belonging gaps followed disability. Gender mattered mainly for views of the institution.</p>
+    <figure class="fig reveal">
+      <div class="fig-title">Where each group fared worse</div>
+      <div class="fig-sub">Gap in percentage points, where positive means the first-named group fared worse. Hover for the underlying shares.</div>
+      <div class="gm" id="gapmap" role="table" aria-label="Gap map of eleven survey outcomes by gender, race and disability"></div>
+      <div class="gm-key" aria-hidden="true">
+        <span>Significant: 0 <i class="ramp"></i> 25+ pts</span>
+        <span><i class="sw" style="background:#fff;border:1.5px dashed #C5CBCD"></i>Not significant</span>
+      </div>
+      <div class="fig-foot">Rows marked "students" were asked of, or tested on, students only.</div>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= FINDING 2 ================= -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg> Finding 2</div>
+    <h2 class="section-title">Agreement looked equal. Disagreement didn't.</h2>
+    <p class="lead">On whether the university was diversifying its faculty, every group agreed at about the same rate. The difference hid in the neutral middle, so I tested the disagreeing end of the scale too.</p>
+    <figure class="fig reveal">
+      <div class="fig-title">"The university is doing a good job increasing the share of faculty of color"</div>
+      <div class="fig-sub">Share of all respondents</div>
+      <div class="legend">
+        <span><i class="mk" style="--c:var(--disagree)"></i>Disagree</span>
+        <span><i class="mk" style="--c:var(--neutral)"></i>Neutral</span>
+        <span><i class="mk" style="--c:var(--agree)"></i>Agree</span>
+      </div>
+      <div id="stacks"></div>
+      <div class="fig-foot">The same pattern held for students, staff and senior administrators of color.</div>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= FINDING 3 ================= -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-people"/></svg> Finding 3</div>
+    <h2 class="section-title">The students who care most about representation see it least</h2>
+    <p class="lead">Students of color were about four times as likely as White students to call it important to be taught by someone of their race or ethnicity, and far less likely to have been.</p>
+    <figure class="fig reveal">
+      <div class="fig-title">Being taught by a faculty member of your own race or ethnicity</div>
+      <div class="fig-sub">Share of current students and alumni</div>
+      <div class="legend">
+        <span><i class="mk" style="--c:var(--poc)"></i>Students of color</span>
+        <span><i class="mk" style="--c:var(--white)"></i>White students</span>
+      </div>
+      <div id="pairs"></div>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= HELD BACK ================= -->
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg> Rigor</div>
+    <h2 class="section-title">The number I didn't test</h2>
+    <div class="held reveal">
+      <div>
+        <div class="label">What the raw tables showed</div>
+        <div class="big">86% of senior administrators with a disability felt they couldn't be their authentic selves.</div>
+      </div>
+      <div>
+        <div class="label">What I reported</div>
+        <div class="big">The pattern, marked as descriptive.</div>
+        <p>That 86% is six of seven people. Outside students, groups were too small to test, so I showed the numbers without significance claims and flagged them for follow-up.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LOOKING BACK ================= -->
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg> Looking back</div>
+    <h2 class="section-title">What I'd do differently</h2>
+    <ul class="tight">
+      <li><strong>Keep racial and ethnic groups separate</strong> where numbers allow. "People of color" merges very different experiences.</li>
+      <li><strong>Model the full response scale</strong> with ordinal models, which would catch hidden disagreement by design.</li>
+      <li><strong>Correct for multiple comparisons.</strong> The strict α helped, but there were well over 100 tests.</li>
+      <li><strong>Check for nonresponse bias.</strong> At 8% response, compare early and late responders, or weight by role.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="glyph-row" aria-hidden="true"><svg class="ic"><use href="#i-hall"/></svg><svg class="ic"><use href="#i-people"/></svg><svg class="ic"><use href="#i-grid"/></svg></div>
+  Campus Belonging · Case Study · Daniel King<br>
+  <a href="index.html#portfolio">← Back to portfolio</a>
+</footer>
+
+<div id="tip" role="tooltip"></div>
+
+<script>
+(function(){
+  document.body.classList.remove('no-js');
+  var tip = document.getElementById('tip');
+  function pct(v){ return Math.round(v) + '%'; }
+  function showTip(e, html){
+    tip.innerHTML = html; tip.classList.add('on');
+    var x = e.clientX + 14, y = e.clientY + 14;
+    var r = tip.getBoundingClientRect();
+    if (x + r.width > window.innerWidth - 8) x = e.clientX - r.width - 14;
+    if (y + r.height > window.innerHeight - 8) y = e.clientY - r.height - 14;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  function hideTip(){ tip.classList.remove('on'); }
+  function bindTip(el, html){
+    el.addEventListener('mousemove', function(e){ showTip(e, html); });
+    el.addEventListener('mouseleave', hideTip);
+    el.addEventListener('click', function(e){ showTip(e, html); e.stopPropagation(); });
+  }
+  document.addEventListener('click', hideTip);
+  document.addEventListener('scroll', hideTip, {passive:true});
+
+  /* ---------- Finding 1: gap map ----------
+     Each comparison: [first group %, reference %, significant at .01 (1/0)]
+     worse: 'hi' = a higher share is worse; 'lo' = a lower share is worse */
+  var COLS = [
+    {h:'Women', s:'vs. men', a:'Women', b:'Men'},
+    {h:'People of color', s:'vs. White', a:'People of color', b:'White'},
+    {h:'Disability', s:'vs. none', a:'With a disability', b:'Without'}
+  ];
+  var ROWS = [
+    {sec:'Experiences of bias · past year'},
+    {t:'Demeaning comments about race or ethnicity', m:'experienced at least once', worse:'hi', v:[[16.84,13.00,0],[30.59,11.95,1],[19.77,15.16,0]]},
+    {t:'Bias against me based on race or ethnicity', m:'experienced at least once', worse:'hi', v:[[9.15,13.26,0],[28.96,5.63,1],[9.41,10.40,0]]},
+    {t:'Demeaning comments about gender', m:'experienced at least once', worse:'hi', v:[[14.25,6.20,0],[8.53,12.72,0],[14.63,11.68,0]]},
+    {t:'Unwanted physical contact (students)', m:'experienced it', worse:'hi', v:[[15.65,7.74,1],[12.34,14.62,0],[30.36,12.05,1]]},
+    {sec:'Belonging'},
+    {t:'I fit into the community', m:'agree', worse:'lo', v:[[75.28,77.18,0],[62.13,79.16,1],[58.00,76.57,1]]},
+    {t:'The community respects who I am', m:'agree', worse:'lo', v:[[79.29,77.37,0],[67.09,81.54,1],[63.00,79.22,1]]},
+    {t:'Felt I couldn’t be my authentic self (students)', m:'felt this at least once', worse:'hi', v:[[42.38,43.01,0],[52.38,38.88,0],[63.08,40.75,1]]},
+    {sec:'Views of the institution'},
+    {t:'A welcoming place for diverse backgrounds', m:'agree', worse:'lo', v:[[61.21,71.39,1],[55.98,66.28,1],[52.53,65.12,0]]},
+    {t:'Disagree it’s diversifying its faculty', m:'disagree', worse:'hi', v:[[31.92,16.96,1],[43.23,23.29,1],[32.98,26.61,0]]},
+    {sec:'Bottom line'},
+    {t:'Satisfied with the university overall', m:'satisfied or very satisfied', worse:'lo', v:[[69.40,73.90,0],[59.41,73.80,1],[55.13,71.33,1]]},
+    {t:'Would recommend it for college', m:'would recommend', worse:'lo', v:[[66.76,71.73,0],[54.87,71.45,1],[48.05,69.60,1]]}
+  ];
+  var lo = [245,226,218], hi = [147,57,31];
+  function shade(g){ var t = Math.max(0, Math.min(1, g/25)); return 'rgb(' + lo.map(function(c,i){ return Math.round(c + (hi[i]-c)*t); }).join(',') + ')'; }
+  var gm = document.getElementById('gapmap');
+  var hdr = '<span role="columnheader"></span>' + COLS.map(function(c){ return '<span class="ch" role="columnheader">' + c.h + '<span>' + c.s + '</span></span>'; }).join('');
+  gm.innerHTML = hdr;
+  var firstSec = true;
+  ROWS.forEach(function(r){
+    if (r.sec){ var s = document.createElement('div'); s.className = 'sec' + (firstSec ? ' first' : ''); s.textContent = r.sec; gm.appendChild(s); firstSec = false; return; }
+    var l = document.createElement('span'); l.className = 'rl'; l.setAttribute('role','rowheader'); l.textContent = r.t; gm.appendChild(l);
+    r.v.forEach(function(v, i){
+      var gap = r.worse === 'hi' ? v[0] - v[1] : v[1] - v[0];
+      var g = Math.round(gap), c = document.createElement('span');
+      c.setAttribute('role','cell');
+      var txt = (g > 0 ? '+' : g < 0 ? '−' : '') + Math.abs(g);
+      c.textContent = txt;
+      if (v[2]){ c.className = 'cell'; c.style.background = shade(gap); c.style.color = gap > 13 ? '#fff' : '#5a2415'; }
+      else { c.className = 'cell ns'; }
+      c.setAttribute('aria-label', COLS[i].a + ' ' + pct(v[0]) + ', ' + COLS[i].b.toLowerCase() + ' ' + pct(v[1]) + (v[2] ? ', significant' : ', not significant'));
+      bindTip(c, '<b>' + r.t + '</b><div>' + COLS[i].a + ': ' + pct(v[0]) + ' ' + r.m + '</div><div>' + COLS[i].b + ': ' + pct(v[1]) + '</div><div class="dim">' + (v[2] ? 'Significant at α = .01' : 'Not significant at α = .01') + '</div>');
+      gm.appendChild(c);
+    });
+  });
+
+  /* ---------- Finding 2: 100% stacked bars ---------- */
+  // [label, disagree, neutral, agree]
+  var groups = [
+    [['People of color', 43.23, 26.20, 30.57], ['White', 23.29, 43.48, 33.23]],
+    [['Women', 31.92, 36.88, 31.20], ['Men', 16.96, 48.10, 34.93]]
+  ];
+  var st = document.getElementById('stacks');
+  groups.forEach(function(gr){
+    var g = document.createElement('div'); g.className = 'sb-group';
+    gr.forEach(function(d){
+      var row = document.createElement('div'); row.className = 'sb-row';
+      row.innerHTML = '<div class="sb-label">' + d[0] + '</div>';
+      var bar = document.createElement('div'); bar.className = 'sb-bar';
+      bar.setAttribute('role','img'); bar.setAttribute('aria-label', d[0] + ': ' + pct(d[1]) + ' disagree, ' + pct(d[2]) + ' neutral, ' + pct(d[3]) + ' agree');
+      [['l','var(--disagree)','Disagree',d[1]],['m','var(--neutral)','Neutral',d[2]],['r','var(--agree)','Agree',d[3]]].forEach(function(s){
+        var seg = document.createElement('div'); seg.className = 'sb-seg ' + s[0];
+        seg.style.setProperty('--c', s[1]); seg.style.flex = s[3] + ' 0 0';
+        seg.textContent = pct(s[3]);
+        bindTip(seg, '<b>' + d[0] + '</b><div>' + s[2] + ': ' + pct(s[3]) + '</div>');
+        bar.appendChild(seg);
+      });
+      row.appendChild(bar); g.appendChild(row);
+    });
+    st.appendChild(g);
+  });
+
+  /* ---------- Finding 3: paired bars ---------- */
+  var pairs = [
+    ['Say it’s very or extremely important', 56.16, 14.61],
+    ['Were taught by one in the past year', 29.66, 81.01]
+  ];
+  var pb = document.getElementById('pairs');
+  pairs.forEach(function(p){
+    var row = document.createElement('div'); row.className = 'pb-row';
+    row.innerHTML = '<div class="pb-label">' + p[0] + '</div>';
+    var bb = document.createElement('div'); bb.className = 'pb-bars';
+    bb.setAttribute('role','img'); bb.setAttribute('aria-label', p[0] + ': students of color ' + pct(p[1]) + ', White students ' + pct(p[2]));
+    [[p[1],'var(--poc)','Students of color'],[p[2],'var(--white)','White students']].forEach(function(v){
+      var line = document.createElement('div'); line.className = 'pb-line';
+      var b = document.createElement('div'); b.className = 'pb-bar'; b.style.setProperty('--c', v[1]); b.style.width = (v[0] * 0.85) + '%';
+      bindTip(b, '<b>' + p[0] + '</b><div>' + v[2] + ': ' + pct(v[0]) + '</div>');
+      var val = document.createElement('span'); val.className = 'pb-val'; val.textContent = pct(v[0]);
+      line.appendChild(b); line.appendChild(val); bb.appendChild(line);
+    });
+    row.appendChild(bb); pb.appendChild(row);
+  });
+
+  /* ---------- reveal ---------- */
+  var rev = [].slice.call(document.querySelectorAll('.reveal'));
+  if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); }, {threshold:.12});
+    rev.forEach(function(r){ io.observe(r); });
+  } else { rev.forEach(function(r){ r.classList.add('in'); }); }
+})();
+</script>
+</body>
+</html>

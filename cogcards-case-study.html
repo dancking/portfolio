@@ -67,6 +67,7 @@
     opacity:.85;
     margin-bottom:22px;
   }
+  .suits-row .yrs{ font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; margin-left:1.2em; color:rgba(244,237,224,.6); }
   .hero h1{
     font-size:clamp(2.2rem, 5vw, 3.2rem);
     line-height:1.12;
@@ -160,6 +161,9 @@
     color:var(--felt);
   }
   .pill-card p{ margin:0; font-size:.94rem; color:#3b3a37; }
+  .pill-card ul{ margin:0; padding-left:18px; font-size:.94rem; color:#3b3a37; }
+  .pill-card li{ margin-bottom:6px; }
+  .pill-card li:last-child{ margin-bottom:0; }
 
   /* TIMELINE */
   .timeline{
@@ -303,6 +307,15 @@
     margin:50px 0 0 0;
     line-height:1.3;
   }
+  .section-rule{
+    border:0;
+    height:1px;
+    width:260px;
+    margin:3rem auto 0;
+    background:linear-gradient(90deg, transparent, #C9C7C1, transparent);
+  }
+  .section-rule + .quote-title{ margin-top:2.5rem; }
+  .section-rule.after{ margin:1.5rem auto 1.5rem; }
   .quote-title {
     font-family:'Fraunces', serif;
     color:var(--crimson);
@@ -390,13 +403,13 @@
 
 <header class="hero">
   <div class="wrap">
-    <div class="suits-row">♠ ♥ ♦ ♣</div>
+    <div class="suits-row">♠ ♥ ♦ ♣<span class="yrs">People Analytics · 2026</span></div>
     <h1>Designing <span class="deck-name">CogCards</span> — a talent assessment platform for evaluating employee decision-making</h1>
-    <p class="sub">A novel, game-based talent assessment I built from scratch and deployed firmwide at a leading global hedge fund to evaluate current staff, guide hiring and improve investment performance.</p>
+    <p class="sub">A novel, game-based talent assessment I built from scratch and deployed firmwide at a leading global hedge fund to evaluate current staff, guide hiring, and improve investing performance.</p>
     <div class="meta-row">
       <div class="meta-item"><div class="label">Role</div><div class="val">End-to-end ownership</div></div>
       <div class="meta-item"><div class="label">Stakeholders</div><div class="val">CIO, Human Capital, Portfolio Managers, Analysts</div></div>
-      <div class="meta-item"><div class="label">Tools &amp; Skills</div><div class="val">Python · SQL · Airflow · Claude Code · Prototyping &amp; iterative design · Behavioral &amp; survey data triangulation · Metric construction &amp; validation</div></div>
+      <div class="meta-item"><div class="label">Tools &amp; Skills</div><div class="val">Python · SQL · Airflow · Claude Code · Prototyping &amp; iterative design · Behavioral &amp; survey data integration · Metric construction &amp; validation</div></div>
     </div>
   </div>
   <div class="card-deco">
@@ -410,12 +423,13 @@
 <section class="alt">
   <div class="wrap">
     <div class="eyebrow"><span class="suit">♠</span> Key Strengths</div>
-    <h2 class="section-title">What this case study shows about how I work</h2>
+    <h2 class="section-title">Research process highlights</h2>
     <ul class="tight">
-      <li><strong>I get senior executive buy-in.</strong> The CIO and senior partners at the firm embraced my platform and directed resources to aid its completion.</li>
-      <li><strong>I construct and validate metrics for measuring people.</strong> Creating and validating novel psychometric constructs for a new behavioral task required literature review, iterative design, simulation studies, and internal and external validation analysis.</li>
-      <li><strong>I combine survey and behavioral data.</strong> Pairing in-game decisions with self-report shows both what people do and what they believe about it, and led to unexpected new insights about our employees.</li>
-      <li><strong>I ship rigorous work with lean resources.</strong> Building the online platform with Claude Code and analyzing open-ended responses with LLMs let me take this from research to firmwide deployment as the sole owner, without needing to use limited engineering resources.</li>
+      <li><strong>Obtained senior executive buy-in.</strong> The CIO and senior partners at the firm embraced my platform and directed resources to aid its completion.</li>
+      <li><strong>Constructed and validated novel metrics for assessing decision-making.</strong> Beginning with scientific literature review, progressing through iteration and simulation studies, and ending with validation checks.</li>
+      <li><strong>Combined behavioral and survey data for deeper insights.</strong> Pairing in-game decisions with self-report data showed both the <em>what</em> and <em>why</em>, and led to unexpected new insights about our employees.</li>
+      <li><strong>A full-service platform shipped with lean resources.</strong> I used Claude Code to help take this from research question to firmwide deployment as the sole owner, avoiding a wait for limited engineering resources.</li>
+      <li><strong>A creative answer to an ambiguous question.</strong> The mandate was simply to develop an assessment tool of some sort. From that starting point, I developed a novel and engaging game that hit our must-haves and that stakeholders loved.</li>
     </ul>
   </div>
 </section>
@@ -423,8 +437,8 @@
 <section>
   <div class="wrap">
     <div class="eyebrow"><span class="suit">♠</span> Overview</div>
-    <h2 class="section-title">A multidimensional assessment in the form of a game</h2>
-    <p class="lead">CogCards is an online, game-based cognitive assessment that measures risk appetite and other key cognitive dimensions to <strong>guide hiring decisions and improve investment team performance</strong>. </p>
+    <h2 class="section-title">A deep talent assessment in the form of a game</h2>
+    <p class="lead"><em>CogCards</em> is an online, game-based cognitive assessment that measures key cognitive dimensions to <strong>guide hiring decisions and improve investment team performance</strong>. </p>
     <p class="lead"> Instead of a simple personality test, candidates play a complex, card-based gambling game, resulting in a <strong>metric-rich snapshot of their decision-making</strong> under stress and uncertainty.</p>
     <p class="lead">Development involved constructing and validating a <strong>novel measurement framework that triangulated behavioral and survey-based data</strong> to predict real-world investment performance.</p>
   </div>
@@ -435,9 +449,9 @@
     <div class="eyebrow"><span class="suit">♥</span> The Problem</div>
     <h2 class="section-title">Risk-taking was a blind spot</h2>
     <p class="lead">
-      Stakeholders at a leading global hedge fund agreed that current risk-taking among the investment team was suboptimal 
+      Senior stakeholders at a leading global hedge fund agreed that current risk-taking among the investment team was suboptimal 
       — but had no reliable way to assess risk appetite and other key cognitive dimensions in current or prospective hires.
-      It's well known in finance that optimal risk-taking is critical to investing skill.</p>
+      <strong>Optimal risk-taking is a critical component of investing skill.</strong></p>
     <div class="two-col">
       <div class="pill-card">
         <h3>Project goal</h3>
@@ -447,7 +461,10 @@
       </div>
       <div class="pill-card">
         <h3>Research questions</h3>
-        <p>Can we identify behavioral patterns that impact investment performance — and what methodology, validated rigorously, can deliver that quickly with limited engineering resources?</p>
+        <ul>
+          <li>Can we identify behavioral patterns that impact investment performance?</li>
+          <li>Which methodology can deliver that quickly and accurately, with limited engineering resources?</li>
+        </ul>
       </div>
     </div>
   </div>
@@ -468,19 +485,19 @@
         <span class="suit-mark red">♥</span>
         <span class="when">Months 2–3</span>
         <h3>Development &amp; Iteration</h3>
-        <p>Built and piloted a game prototype and results dashboard, cycling through stakeholder feedback and analysis between rounds.</p>
+        <p>Built and piloted a game prototype and results dashboard, incorporating stakeholder feedback and analysis results between rounds.</p>
       </div>
       <div class="stage reveal">
         <span class="suit-mark red">♦</span>
         <span class="when">Month 4</span>
         <h3>Deployment</h3>
-        <p>Shipped the final platform (JavaScript + Claude Code) with a custom-built Python-based interactive results dashboard, live with candidates and current analysts.</p>
+        <p>Shipped the final platform with a custom-built Python-based interactive results dashboard, live with candidates and current analysts.</p>
       </div>
       <div class="stage reveal">
         <span class="suit-mark black">♣</span>
         <span class="when">Month 5+</span>
         <h3>Analysis &amp; Refinement</h3>
-        <p>Validated the measurement framework internally and externally, then mined behavioral insights from the results.</p>
+        <p>Validated the measurement framework internally and externally, while gaining new behavioral insights about current staff from the results.</p>
       </div>
     </div>
   </div>
@@ -513,27 +530,24 @@
 <section>
   <div class="wrap">
     <div class="eyebrow"><span class="suit">♥</span> Key Findings</div>
-    <h2 class="section-title">Suboptimal Risk, Overconfidence, and Cognitive Biases</h2>
-    <p class="lead">Validating the framework internally (behavioral × self-report) and externally (against portfolio metrics) surfaced several surprising patterns: 
-      the current team's distribution of risk-taking profiles was missing a key range entirely,
-      risk-taking was often suboptimal, the worst performers overestimated their own performance 
-      (and the best performers underestimated theirs), 
-      and there were surprisingly high rates of cognitive biases affecting decision-making.
-    </p>
+    <h2 class="section-title">Identifying opportunities to improve decision-making among employees</h2>
+    <p class="lead">My analysis revealed several surprising patterns that we didn't expect to see among our highly-educated and experienced employees.</p>
     <!-- <h3>Gambler's Fallacy found among players</h3> -->
     
     <div class="findings-grid">
       <div class="finding reveal"><span class="tag">Behavioral Data</span><p>Risk-taking was often suboptimal for maximizing gains in-game.</p></div>
       <div class="finding reveal"><span class="tag">Self-report Data</span><p>An unexpectedly high rate of cognitive biases, including gambler's fallacy.</p></div>
-      <div class="finding reveal"><span class="tag">Combined</span><p>Clear evidence of a Dunning-Kruger effect — overconfidence concentrated among weaker performers.</p></div>
+      <div class="finding reveal"><span class="tag">Combined</span><p>Clear evidence of a Dunning–Kruger effect — overconfidence concentrated among weaker performers.</p></div>
       <div class="finding reveal"><span class="tag">Qualitative</span><p>Open-ended responses (analyzed with Claude) surfaced recurring player archetypes.</p></div>
     </div>
+    <hr class="section-rule" aria-hidden="true">
     <h4 class="quote-title">
     Evidence for Gambler's Fallacy
     </h4>
     <div class="quote-block" style="margin:15px 30px 30px 0;">
       “If I lost several card draws in a row, I would keep hitting that deck because I knew a win would be coming…”
     </div>
+    <hr class="section-rule after" aria-hidden="true">
   </div>
   <div class="wide">
     <div class="scrolly">
@@ -555,19 +569,19 @@
       <div class="scrolly-steps">
         <div class="step" data-step="0"><div class="step-card">
           <h3>Each dot is one player</h3>
-          <p>Across: how they actually performed, as a percentile. Up: where they believed they had placed.</p>
+          <p>Y-axis: how each player <em>thought</em> they performed vs other players. X-axis: how they <em>actually</em> performed vs other players, as a percentile. </p>
         </div></div>
         <div class="step" data-step="1"><div class="step-card">
-          <h3>Add perfect calibration</h3>
-          <p>A player on the dashed line judged their own performance exactly. Above it, they overestimated; below it, they underestimated.</p>
+          <h3>Unbiased perception</h3>
+          <p>A player on the dashed line judged their own performance exactly. Above it, they overestimated their ability; below, they underestimated it.</p>
         </div></div>
         <div class="step" data-step="2"><div class="step-card">
-          <h3>The weakest performers overestimated most</h3>
-          <p>Players in the <span class="sw" style="--c:rgba(156,43,58,.9)"></span>bottom third placed themselves far above where they actually finished.</p>
+          <h3>The weakest performers overestimated the most</h3>
+          <p>Players in the bottom third of actual performance (<span class="sw" style="--c:rgba(156,43,58,.9)"></span>) rated themselves as far better than they actually were.</p>
         </div></div>
         <div class="step" data-step="3"><div class="step-card">
-          <h3>The strongest performers underestimated</h3>
-          <p>Players in the <span class="sw" style="--c:rgba(23,50,40,.9)"></span>top third placed themselves below their real standing. It's the classic Dunning–Kruger pattern, and overconfidence is a widespread and consequential problem in investing.</p>
+          <h3>The strongest performers underestimated their ability</h3>
+          <p>Players in the top third (<span class="sw" style="--c:rgba(156,43,58,.9)"></span>) ranked themselves below their actual standing. It's the classic Dunning–Kruger pattern, and it matters: <strong>overconfidence is a widespread and consequential problem in investing.</strong></p>
         </div></div>
       </div>
     </div>
@@ -579,23 +593,15 @@
     <div class="eyebrow"><span class="suit">♦</span> Recommendations</div>
     <h2 class="section-title">From insight to action</h2>
     <ul class="tight">
-      <li>Recommended a target range of risk appetite scores to guide new hires.</li>
-      <li>Recommended targeted education for current employees on probabilistic concepts and biases like gambler's fallacy and overconfidence.</li>
-      <li>Leveraged Claude Code to mitigate use of limited engineering resources and speed up turnaround time by months</li>
+      <li><em>CogCards</em> is now deployed firmwide and given to all investment team hiring candidates, used by human capital and portfolio managers to guide hiring decisions.</li>
+      <li>I recommended targeted education for current employees on probabilistic concepts and biases like gambler's fallacy and overconfidence and their relevance to investing skill.</li>
     </ul>
   </div>
 </section>
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="suit">♣</span> Looking Ahead</div>
-    <h2 class="section-title">Next steps</h2>
-    <ul class="tight">
-      <li>Explore richer use of the self-report section.</li>
-      <li>Re-run the overconfidence analysis to check whether the intervention is sticking.</li>
-      <li>Scale AI's role in qualitative analysis — automatic profile and trend detection, plus an AI-generated summary at the top of each scorecard.</li>
-    </ul>
-    <p class="note">Some findings have been generalized or omitted, and all visuals are mockups, to preserve confidentiality. They remain faithful to the original results and content.</p>
+    <p class="note" style="margin:0; border-top:0; padding-top:0;">Some findings have been generalized or omitted, and all visuals are mockups, to preserve confidentiality. They remain faithful to the original results and content.</p>
   </div>
 </section>
 

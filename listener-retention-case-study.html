@@ -53,7 +53,7 @@
   .hero .wrap{ position:relative; z-index:2; }
   .ic{ width:1em; height:1em; fill:currentColor; display:inline-block; vertical-align:-0.12em; flex:none; }
   .glyph-row{ display:flex; align-items:center; gap:.7em; font-size:1.15rem; color:var(--gold); opacity:.85; margin-bottom:22px; }
-  .glyph-row .rec-dot{ color:#F8766D; display:flex; margin-left:.4em; }
+  .glyph-row .rec-dot{ display:flex; margin-left:.4em; }
   .hero h1{
     font-size:clamp(2.2rem, 5vw, 3.2rem);
     line-height:1.12; letter-spacing:-0.01em; max-width:15ch;
@@ -80,12 +80,8 @@
     transform-origin:bottom;
     animation:pulse var(--d) ease-in-out infinite alternate;
   }
-  .eq-cap{
-    position:absolute; right:56px; bottom:242px; z-index:1;
-    font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:rgba(243,241,236,.5);
-  }
   @keyframes pulse{ from{ transform:scaleY(.82);} to{ transform:scaleY(1);} }
-  @media (max-width:1060px){ .eq, .eq-cap{ display:none; } }
+  @media (max-width:1060px){ .eq{ display:none; } }
 
   /* ---------- SECTIONS ---------- */
   section{ padding:64px 0; }
@@ -382,8 +378,8 @@
 <header class="hero">
   <div class="wrap">
     <div class="glyph-row" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-prev"/></svg><svg class="ic" aria-hidden="true"><use href="#i-rew"/></svg><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg><svg class="ic" aria-hidden="true"><use href="#i-pause"/></svg><svg class="ic" aria-hidden="true"><use href="#i-ff"/></svg><svg class="ic" aria-hidden="true"><use href="#i-next"/></svg><span class="rec-dot"><svg class="ic" aria-hidden="true"><use href="#i-rec"/></svg></span></div>
-    <h1>Reading <span class="hl">retention</span> in the way people listen</h1>
-    <p class="sub">Three years of data from a major music-streaming platform showed flat growth. Underneath were platforms losing the listeners they had just won, a yearly cycle of interest and drop-off, and two very different ways of listening. Measuring stickiness, how often listeners chose to come back, alongside listening time brought them into view.</p>
+    <h1>Listener retention analysis: who stays and how they listen</h1>
+    <p class="sub">Three years of data from a major music-streaming platform showed flat growth. Looking underneath the hood showed variance across platforms in losing new users, cyclical engagement, as well as two very different listening styles. Measuring stickiness alongside listening duration teased these engagement insights apart.</p>
     <div class="meta-row">
       <div class="meta-item"><div class="label">Role</div><div class="val">Solo, end to end</div></div>
       <div class="meta-item"><div class="label">Context</div><div class="val">Analytics case study · 2023</div></div>
@@ -391,7 +387,6 @@
       <div class="meta-item"><div class="label">Tools</div><div class="val">R · ggplot2</div></div>
     </div>
   </div>
-  <div class="eq-cap" aria-hidden="true">Active days / listener · Dec 2019</div>
   <div class="eq" aria-hidden="true">
     <div class="bar" style="--v:10.74; --d:1.1s; background:var(--ios)"></div>
     <div class="bar" style="--v:9.89;  --d:1.4s; background:var(--android)"></div>
@@ -406,11 +401,11 @@
 <section class="alt">
   <div class="wrap">
     <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-rec"/></svg></span> Key Strengths</div>
-    <h2 class="section-title">What this case study shows about how I work</h2>
+    <h2 class="section-title">Research Process Highlights</h2>
     <ul class="tight">
-      <li><strong>I question my own ideas.</strong> I chose a metric for engagement and then looked for where it fell short.</li>
-      <li><strong>I rule out alternative explanations before drawing conclusions.</strong> Separating acquisition from retention turned a vague "Android is down" into a specific, testable question about Android itself.</li>
-      <li><strong>I break down complex ideas into simpler ones.</strong> I communicate complex ideas clearly by introducing them sequentially through smaller steps, especially by introducing visuals sequentially to make understanding easier.</li>
+      <li><strong>Stress-tested my own metric.</strong> Chose active days per listener as a stand-in for satisfaction, then checked where it fell short against listening time.</li>
+      <li><strong>Ruled out alternative explanations.</strong> Separating acquisition from retention turned a vague "Android is down" into a specific, testable question about Android itself.</li>
+      <li><strong>Made complexity digestible.</strong> Introduced ideas one step at a time, building each visual in sequence so the story stayed easy to follow.</li>
     </ul>
     <p class="note">This was a product analytics case study using aggregate platform data. The company's name is withheld. All figures are my originals, built in R.</p>
   </div>

@@ -118,6 +118,7 @@
   .pill-card ol{ margin:0; padding-left:18px; }
   .pill-card li{ margin-bottom:6px; }
 
+  .data-label{ font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; font-weight:600; color:var(--muted); margin-top:18px; margin-bottom:-10px; }
   .data-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
   .chip{
     font-size:.78rem; padding:4px 10px; border-radius:99px;
@@ -132,7 +133,7 @@
   .method-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:30px; }
   @media (max-width:700px){ .method-row{ grid-template-columns:1fr; } }
   .method-card{ padding:24px; border-radius:12px; background:var(--night); color:var(--cream); }
-  .method-card .glyph{ font-size:1.4rem; color:var(--gold); display:block; margin-bottom:10px; }
+  .method-card .glyph{ font-size:1.4rem; color:var(--gold); display:block; margin-bottom:10px;  font-weight:600; line-height:1; }
   .method-card h3{ font-size:1rem; margin-bottom:6px; color:var(--cream); }
   .method-card p{ font-size:.86rem; color:rgba(243,241,236,0.8); margin:0; }
 
@@ -415,23 +416,23 @@
 <section>
   <div class="wrap">
     <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></span> At a glance</div>
-    <h2 class="section-title">A flat total with four stories underneath</h2>
+    <h2 class="section-title">Flat overall growth masking 4 underlying trends</h2>
     <p class="lead">Headline listener counts barely moved in three years. Splitting them by platform and time, and measuring <em>how</em> people listened, showed where the product was working and where it wasn't.</p>
     <div class="glance">
       <div class="g-card reveal" style="--c:var(--gold)">
-        <div class="g-num">+3.3%</div>
-        <p><strong>Net listener growth in three years</strong> (64.3M → 66.4M monthly listeners). That small number covers a yearly pattern of new listeners arriving and then drifting away.</p>
+        <div class="g-num">Cyclical engagement</div>
+        <p><strong>Net listener growth was 3.3% overthree years</strong> (64.3M → 66.4M monthly listeners). Looking deeper revealed an annual pattern of new listeners arriving and then drifting away.</p>
       </div>
       <div class="g-card reveal" style="--c:var(--android)">
         <div class="g-num">iOS ≈ Android</div>
-        <p><strong>Both gained new listeners at nearly the same rate, but only iOS kept them.</strong> How fast a platform acquired listeners didn't predict whether it retained them.</p>
+        <p><strong>Both gained new listeners at nearly the same rate, but only iOS kept them</strong>, suggesting a platform-based (or possibly demographic-based) issue.</p>
       </div>
       <div class="g-card reveal" style="--c:var(--web)">
-        <div class="g-num">Web</div>
-        <p><strong>It gained new listeners faster than any other platform and lost them faster too.</strong> That could make it an on-ramp to other platforms, or it could mean the Web experience is losing people.</p>
+        <div class="g-num">Web usage was unique</div>
+        <p><strong>It gained new listeners faster than any other platform and lost them faster too.</strong> That could make it an on-ramp to other platforms, or it could mean the Web experience is losing people. Across platforms, acquisition rates didn't predict retention.</p>
       </div>
       <div class="g-card reveal" style="--c:var(--ios)">
-        <div class="g-num">2× <small>the days</small></div>
+        <div class="g-num">2 distinct listening patterns</div>
         <p><strong>Mobile listeners came back about twice as often as others, but had the shortest sessions</strong> (84 min on iOS vs. 174 on Web). The platforms serve two different kinds of listening.</p>
       </div>
     </div>
@@ -441,14 +442,16 @@
 <!-- ================= THE BRIEF ================= -->
 <section class="alt">
   <div class="wrap">
-    <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-pause"/></svg></span> The brief</div>
-    <h2 class="section-title">A retention question with only three variables</h2>
-    <p class="lead">The platform wanted to know how well it was keeping listeners over three years, on every device they used. The data was thin: aggregate counts only, with no user-level records, surveys or demographics.</p>
+    <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-pause"/></svg></span> The assignment</div>
+    <h2 class="section-title">A retention question with few supporting metrics</h2>
+    <p class="lead">The platform wanted to understand user retention across all platforms over a three year period. The data was sparse: aggregate counts only, with no user-level records, surveys or demographics, and only three metrics provided.</p>
+    <div class="data-label">Metrics</div>
     <div class="data-chips">
       <span class="chip">Monthly unique listeners</span>
       <span class="chip">Daily unique listeners</span>
       <span class="chip">Daily seconds listened</span>
     </div>
+    <div class="data-label">Platforms</div>
     <div class="data-chips">
       <span class="chip dot" style="--c:var(--ios)">iOS</span>
       <span class="chip dot" style="--c:var(--android)">Android</span>
@@ -460,7 +463,7 @@
     <div class="two-col">
       <div class="pill-card">
         <h3>The ask</h3>
-        <p>Assess listener retention from January 2018 to December 2020 across six platform groups, and recommend where product should focus.</p>
+        <p>Assess listener retention from January 2018 to December 2020 across six platform groups, and make recommendations based on the findings.</p>
       </div>
       <div class="pill-card">
         <h3>Research questions</h3>
@@ -478,27 +481,27 @@
 <section>
   <div class="wrap">
     <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-prev"/></svg></span> Approach</div>
-    <h2 class="section-title">Split the data, test the obvious explanation, then find a better measure</h2>
+    <h2 class="section-title">Slicing the data and checking for blind spots</h2>
     <div class="method-row">
       <div class="method-card">
-        <span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-rew"/></svg></span>
+        <span class="glyph">1.</span>
         <h3>Break it down</h3>
-        <p>I split the total by platform and by month, then marked each year and zoomed in until patterns in the aggregate became visible.</p>
+        <p>Exploratory analysis began at the highest level (overall growth) before breaking the aggregates down by platform and metric to understand what's going on beneath the surface.</p>
       </div>
       <div class="method-card">
-        <span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></span>
+        <span class="glyph">2.</span>
         <h3>Test a rival explanation</h3>
         <p>Were losing platforms simply attracting fewer new listeners? Comparing monthly with cumulative listener counts separated acquisition from retention.</p>
       </div>
       <div class="method-card">
-        <span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-ff"/></svg></span>
+        <span class="glyph">3.</span>
         <h3>Choose the right metric, then test it</h3>
-        <p>I used stickiness, expressed as <em>active days per listener</em>, as a behavioral stand-in for satisfaction, then checked its blind spot against listening time.</p>
+        <p>I used stickiness--expressed as active days per listener--as a proxy for satisfaction, then looked for behavior that it didn't measure, like listening time.</p>
       </div>
     </div>
     <div class="how-to">
       <span class="ico">↓</span>
-      <span>I show data the way I'd present it to a room: one layer at a time. As you scroll, each chart below builds step by step. Click or tap any chart to see it full size.</span>
+      <span>I show data below the way I'd present it to a room: one layer at a time. As you scroll, each chart below builds step by step. Click or tap any chart to see it full size.</span>
     </div>
   </div>
 </section>

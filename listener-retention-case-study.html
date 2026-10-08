@@ -94,6 +94,7 @@
   .glance{
     display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:30px;
   }
+  .glance .g-card.wide{ grid-column:1 / -1; }
   @media (max-width:640px){ .glance{ grid-template-columns:1fr; } }
   .g-card{
     background:var(--paper); border:1px solid var(--line); border-radius:12px;
@@ -161,7 +162,7 @@
   .scrolly-steps{ grid-area:steps; padding:4vh 0 26vh; }
 
   .fig-head{
-    display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+    display:flex; justify-content:center; align-items:baseline; gap:12px; text-align:center;
     margin-bottom:10px;
   }
   .fig-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1rem; color:var(--night); }
@@ -379,7 +380,7 @@
 <header class="hero">
   <div class="wrap">
     <div class="glyph-row" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-prev"/></svg><svg class="ic" aria-hidden="true"><use href="#i-rew"/></svg><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg><svg class="ic" aria-hidden="true"><use href="#i-pause"/></svg><svg class="ic" aria-hidden="true"><use href="#i-ff"/></svg><svg class="ic" aria-hidden="true"><use href="#i-next"/></svg><span class="rec-dot"><svg class="ic" aria-hidden="true"><use href="#i-rec"/></svg></span></div>
-    <h1>Listener retention analysis: who stays and how they listen</h1>
+    <h1>Listener retention analysis: a cross-platform behavioral study</h1>
     <p class="sub">Three years of data from a major music-streaming platform showed flat growth. Looking underneath the hood showed variance across platforms in losing new users, cyclical engagement, as well as two very different listening styles. Measuring stickiness alongside listening duration teased these engagement insights apart.</p>
     <div class="meta-row">
       <div class="meta-item"><div class="label">Role</div><div class="val">Solo, end to end</div></div>
@@ -404,9 +405,8 @@
     <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-rec"/></svg></span> Key Strengths</div>
     <h2 class="section-title">Research Process Highlights</h2>
     <ul class="tight">
-      <li><strong>Making complexity digestible.</strong> Whenever possible, I introduce complex ideas and visuals one step at a time, building the larger idea piece by piece so the story stays easy to follow.</li>
-      <li><strong>Stress-tested my own metric.</strong> Chose active days per listener as a stand-in for satisfaction, then checked where it fell short against listening time.</li>
-      <li><strong>Ruled out alternative explanations.</strong> Separating acquisition from retention turned a vague "Android is down" into a specific, testable question about Android itself.</li>
+      <li><strong>Questioning metrics and findings.</strong> I'm always skeptical of my own results and always look for blind spots that my chosen metrics might be missing.</li>
+      <li><strong>Making complexity digestible.</strong> Whenever possible, I introduce complex ideas and visuals one step at a time, building the larger idea piece by piece so the finding can actually be understood</li>
     </ul>
     <p class="note">This was a product analytics case study using aggregate platform data. The company's name is withheld. All figures are my originals, built in R.</p>
   </div>
@@ -416,24 +416,20 @@
 <section>
   <div class="wrap">
     <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-play"/></svg></span> At a glance</div>
-    <h2 class="section-title">Flat overall growth masking 4 underlying trends</h2>
+    <h2 class="section-title">Three key findings</h2>
     <p class="lead">Headline listener counts barely moved in three years. Splitting them by platform and time, and measuring <em>how</em> people listened, showed where the product was working and where it wasn't.</p>
     <div class="glance">
-      <div class="g-card reveal" style="--c:var(--gold)">
-        <div class="g-num">Cyclical engagement</div>
-        <p><strong>Net listener growth was 3.3% overthree years</strong> (64.3M → 66.4M monthly listeners). Looking deeper revealed an annual pattern of new listeners arriving and then drifting away.</p>
+      <div class="g-card wide reveal" style="--c:var(--gold)">
+        <div class="g-num">1. Flat growth hid a yearly churn cycle</div>
+        <p>Monthly listeners rose only 3.3% in three years (64.3M → 66.4M), but within each year the swing was bigger than that year's net growth: listeners jump in January, bottom out around October and recover over the holidays.</p>
       </div>
       <div class="g-card reveal" style="--c:var(--android)">
-        <div class="g-num">iOS ≈ Android</div>
-        <p><strong>Both gained new listeners at nearly the same rate, but only iOS kept them</strong>, suggesting a platform-based (or possibly demographic-based) issue.</p>
-      </div>
-      <div class="g-card reveal" style="--c:var(--web)">
-        <div class="g-num">Web usage was unique</div>
-        <p><strong>It gained new listeners faster than any other platform and lost them faster too.</strong> That could make it an on-ramp to other platforms, or it could mean the Web experience is losing people. Across platforms, acquisition rates didn't predict retention.</p>
+        <div class="g-num">2. Differing retention among similar platforms</div>
+        <p>iOS and Android gained new listeners at almost the same rate, but only iOS kept them, which points to the Android experience. Web gained listeners fastest of any platform and lost them fastest. Whether it's an on-ramp to other platforms or a leak is the next question to answer.</p>
       </div>
       <div class="g-card reveal" style="--c:var(--ios)">
-        <div class="g-num">2 distinct listening patterns</div>
-        <p><strong>Mobile listeners came back about twice as often as others, but had the shortest sessions</strong> (84 min on iOS vs. 174 on Web). The platforms serve two different kinds of listening.</p>
+        <div class="g-num">3. Two ways of listening</div>
+        <p>Mobile listeners returned many days each month for mostly short listens. Web and connected devices were accessed much less often but for longer hours. Because frequency and duration run in opposite directions, one retention target for every platform would mislead.</p>
       </div>
     </div>
   </div>
@@ -490,13 +486,13 @@
       </div>
       <div class="method-card">
         <span class="glyph">2.</span>
-        <h3>Test a rival explanation</h3>
-        <p>Were losing platforms simply attracting fewer new listeners? Comparing monthly with cumulative listener counts separated acquisition from retention.</p>
+        <h3>Generate hypotheses</h3>
+        <p>How does retention and engagement vary by platform? How does acquisition relate to retention? Do similar platforms always show similar user behavior?</p>
       </div>
       <div class="method-card">
         <span class="glyph">3.</span>
-        <h3>Choose the right metric, then test it</h3>
-        <p>I used stickiness--expressed as active days per listener--as a proxy for satisfaction, then looked for behavior that it didn't measure, like listening time.</p>
+        <h3>Test and reassess</h3>
+        <p>I used stickiness (operationalized as active days per listener) as a proxy for satisfaction, then looked for behavior that it didn't measure and alternative explanations for the results.</p>
       </div>
     </div>
     <div class="how-to">
@@ -510,7 +506,7 @@
 <section class="alt">
   <div class="wrap chapter-head">
     <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-ff"/></svg></span> Finding 1</div>
-    <h2 class="section-title">The flat headline hides a yearly cycle</h2>
+    <h2 class="section-title">A yearly cycle of acquisition and churn</h2>
   </div>
   <div class="wide">
     <div class="scrolly" data-title="Monthly unique listeners, Jan 2018 – Dec 2020">
@@ -518,8 +514,8 @@
         <div class="fig-head"><span class="fig-title">Monthly unique listeners by platform</span></div>
         <div class="stage" style="--ar:2394/1110" tabindex="0" role="button" aria-label="Enlarge current chart">
           <img class="frame on" src="Plots/overall1.png" alt="Stacked bars of monthly unique listeners by platform, Jan 2018 to Dec 2020. iOS and Android make up most of roughly 60 to 67 million monthly listeners.">
-          <img class="frame" src="Plots/overall3.png" alt="The same stacked bars with a black line tracing total monthly listeners, which rises and falls over each year.">
           <img class="frame" src="Plots/overall2.png" alt="Bars faded, with a red dotted line from 64,287,681 listeners in Jan 2018 to 66,416,272 in Dec 2020.">
+          <img class="frame" src="Plots/overall3.png" alt="The same stacked bars with a black line tracing total monthly listeners, which rises and falls over each year.">
           <img class="frame" src="Plots/overall4.png" alt="Zoomed view of total monthly listeners with dashed lines at each January: sharp peaks each January, a trough around October, and recovery through the holidays.">
           <span class="enlarge">⤢ Enlarge</span>
         </div>
@@ -531,13 +527,13 @@
           <p>Of the roughly 65M people who listen each month, more than 70% use <span class="pl"><span class="sw" style="--c:var(--ios)"></span>iOS</span> or <span class="pl"><span class="sw" style="--c:var(--android)"></span>Android</span>.</p>
         </div></div>
         <div class="step" data-frame="1"><div class="step-card">
-          <h3>The total goes up and down more than it grows</h3>
-          <p>The black line is the total across all platforms, and the same rise-and-fall shape shows up every year.</p>
-        </div></div>
-        <div class="step" data-frame="2"><div class="step-card">
           <h3>Three years of growth: 3.3%</h3>
           <p>From January 2018 to December 2020, monthly listeners grew from 64,287,681 to 66,416,272, a gain of about 2 million.</p>
-          <span class="stat-pill">+3.3% in 3 years</span>
+          <span class="stat-pill">+1.1% per year</span>
+        </div></div>
+        <div class="step" data-frame="2"><div class="step-card">
+          <h3>But the annual variance in growth is greater than its total</h3>
+          <p>Each year, the fluctuation in total listeners was greater than overall growth for that year.</p>
         </div></div>
         <div class="step" data-frame="3"><div class="step-card">
           <h3>A new-year spike, then a slow fade</h3>
@@ -553,7 +549,7 @@
 <section>
   <div class="wrap chapter-head">
     <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-ff"/></svg></span> Finding 2</div>
-    <h2 class="section-title">Acquiring listeners doesn't mean keeping them</h2>
+    <h2 class="section-title">Acquisition and retention patterns varied widely by platform</h2>
   </div>
   <div class="wide">
     <div class="scrolly">
@@ -578,9 +574,9 @@
           <p>Maybe the losing platforms just attract fewer new listeners. The right panel counts every listener each platform has ever had, so a steeper line means new listeners are joining faster.</p>
         </div></div>
         <div class="step" data-frame="2"><div class="step-card">
-          <h3>Same new listeners, opposite results</h3>
+          <h3>Same acquisition rate, but opposite results</h3>
           <p><span class="pl"><span class="sw" style="--c:var(--ios)"></span>iOS</span> and <span class="pl"><span class="sw" style="--c:var(--android)"></span>Android</span> gain new listeners at almost the same rate, but only iOS keeps them.</p>
-          <p>The two are used in similar situations on similar devices, so the gap points to something specific to Android, possibly in its interface.</p>
+          <p>Both are used in similar situations on similar devices, so the gap likely points to something specific to Android, such as its interface or performance. Android and iOS users also differ demographically, though, and aggregate counts can't rule that out.</p>
         </div></div>
         <div class="step" data-frame="3"><div class="step-card">
           <h3>Web: quickest to gain listeners and quickest to lose them</h3>
@@ -595,9 +591,9 @@
 <!-- ================= THE METRIC ================= -->
 <section class="alt">
   <div class="wrap">
-    <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-stop"/></svg></span> The metric</div>
+    <div class="eyebrow"><span class="glyph"><svg class="ic" aria-hidden="true"><use href="#i-stop"/></svg></span> Deriving a better metric</div>
     <h2 class="section-title">Measuring choice, not presence</h2>
-    <p class="lead">Counting listeners shows <em>whether</em> people show up. The usual alternative, average listening time, is harder to read: a four-hour session could be a devoted fan, or a speaker left playing at a party. So I used a standard measure of <strong>deliberate behavior</strong>, stickiness: the decision to come back.</p>
+    <p class="lead">Counting listeners shows <em>whether</em> people show up. The usual alternative, average listening time, is harder to read: four hours of listening in a day could be a devoted fan, or a speaker left playing at a party. So I used a standard measure of <strong>deliberate behavior</strong>, stickiness: the decision to come back.</p>
     <div class="formula-card reveal">
       <div class="formula">
         <span class="name">Active days per listener</span>
@@ -616,7 +612,7 @@
     <div class="two-col" style="margin-top:22px">
       <div class="pill-card">
         <h3>Why this metric</h3>
-        <p><strong>It captures purposeful behavior.</strong> Opening the app on a new day is a deliberate choice, and that makes it a reasonable stand-in for satisfaction and a likely predictor of retention.</p>
+        <p><strong>It captures purposeful behavior.</strong> Opening the app on a new day is a deliberate choice, and that makes it a reasonable stand-in for satisfaction. Whether it predicts retention is a hypothesis to test with user-level data.</p>
       </div>
       <div class="pill-card">
         <h3>Easy to use</h3>
@@ -640,7 +636,7 @@
           <img class="frame on" src="Plots/active_days.png" alt="Average active days per month by platform, 2018 to 2020: iOS around 10 to 11 days, Android around 10, Roku, All Others and Web around 5 to 6, Amazon around 4.5 to 5.">
           <img class="frame" src="Plots/active_days_woverall.png" alt="The same chart with a dashed grey line for the overall average, around 9 days per month.">
           <img class="frame" src="Plots/avg_mins.png" alt="Average minutes listened per daily listener by platform: All Others highest near 240 minutes, Web around 175, Roku and Amazon around 120 to 150, Android around 105, iOS lowest around 85.">
-          <img class="frame" src="Plots/distr.png" alt="Histograms of minutes listened for each platform: iOS, Android, Amazon and All Others each have one peak; Web has two (short and long sessions); Roku has three.">
+          <img class="frame" src="Plots/distr.png" alt="Histograms of daily average minutes per listener for each platform: iOS, Android, Amazon and All Others each have one peak; Web has two clusters of days (shorter and longer listening); Roku has three.">
           <span class="enlarge">⤢ Enlarge</span>
         </div>
         <div class="dots"></div>
@@ -648,20 +644,20 @@
       <div class="scrolly-steps">
         <div class="step" data-frame="0"><div class="step-card">
           <h3>Mobile listeners come back the most often</h3>
-          <p>Mobile listeners are active on about 10–11 days a month, compared with 5–6 on other platforms. In December 2019: <span class="pl"><span class="sw" style="--c:var(--ios)"></span>iOS</span> 10.74, <span class="pl"><span class="sw" style="--c:var(--android)"></span>Android</span> 9.89, <span class="pl"><span class="sw" style="--c:var(--roku)"></span>Roku</span> 5.58, <span class="pl"><span class="sw" style="--c:var(--amazon)"></span>Amazon</span> 4.75.</p>
+          <p>Mobile listeners are active about 10–11 days a month, compared with 5–6 on other platforms. In December 2019: <span class="pl"><span class="sw" style="--c:var(--ios)"></span>iOS</span> 10.74, <span class="pl"><span class="sw" style="--c:var(--android)"></span>Android</span> 9.89, <span class="pl"><span class="sw" style="--c:var(--roku)"></span>Roku</span> 5.58, <span class="pl"><span class="sw" style="--c:var(--amazon)"></span>Amazon</span> 4.75.</p>
         </div></div>
         <div class="step" data-frame="1"><div class="step-card">
           <h3>Mobile raises the overall average</h3>
-          <p>Across all platforms, a typical listener was active on about 9 days a month. That average sits near the mobile lines because mobile makes up most of the audience.</p>
+          <p>Averaging across platforms, a typical listener was active 9 days a month. However, that average is heavily weighted towards the large number of mobile users on the service.</p>
         </div></div>
         <div class="step" data-frame="2"><div class="step-card">
           <h3>Testing the metric's blind spot flips the ranking</h3>
-          <p>Active days say nothing about <em>how long</em> people listen. By listening time, mobile goes from top to bottom: <span class="pl"><span class="sw" style="--c:var(--ios)"></span>iOS</span> averages 84 minutes a session and <span class="pl"><span class="sw" style="--c:var(--android)"></span>Android</span> 106. <span class="pl"><span class="sw" style="--c:var(--web)"></span>Web</span> averages 174, and <span class="pl"><span class="sw" style="--c:var(--others)"></span>All Others</span> about 4 hours.</p>
-          <span class="stat-pill">More active days, shorter sessions</span>
+          <p>Active days say nothing about <em>how long</em> people listen. Measured as minutes per listener on a day they listened, mobile goes from top to bottom: <span class="pl"><span class="sw" style="--c:var(--ios)"></span>iOS</span> averages 84 minutes a day and <span class="pl"><span class="sw" style="--c:var(--android)"></span>Android</span> 106. <span class="pl"><span class="sw" style="--c:var(--web)"></span>Web</span> averages 174, and <span class="pl"><span class="sw" style="--c:var(--others)"></span>All Others</span> about 4 hours.</p>
+          <span class="stat-pill">More active days, less time per day</span>
         </div></div>
         <div class="step" data-frame="3"><div class="step-card">
-          <h3>Some platforms serve several uses at once</h3>
-          <p>Session lengths on most platforms have a single peak. <span class="pl"><span class="sw" style="--c:var(--web)"></span>Web</span>'s split into short and long sessions, and <span class="pl"><span class="sw" style="--c:var(--roku)"></span>Roku</span>'s into short, medium and long, which suggests several different reasons for listening on the same device.</p>
+          <h3>Some platforms have more than one kind of listening day</h3>
+          <p>On most platforms, daily listening time per listener stays near one typical value. <span class="pl"><span class="sw" style="--c:var(--web)"></span>Web</span>'s splits into two clusters of days, shorter and longer, and <span class="pl"><span class="sw" style="--c:var(--roku)"></span>Roku</span>'s into three. Typical listening on those platforms shifts from day to day, possibly between weekdays and weekends, which is worth breaking out next.</p>
         </div></div>
       </div>
     </div>
@@ -680,26 +676,26 @@
         <h3>Frequent and short</h3>
         <div class="arch-stats">
           <div><div class="n">~10</div><div class="u">active days / month</div></div>
-          <div><div class="n">84–106</div><div class="u">min / session</div></div>
+          <div><div class="n">84–106</div><div class="u">min / day</div></div>
         </div>
         <div class="rhythm" style="--c:var(--ios)" aria-hidden="true">
           <span class="on"></span><span></span><span class="on"></span><span></span><span></span><span class="on"></span><span></span><span class="on"></span><span></span><span></span><span class="on"></span><span></span><span class="on"></span><span></span><span></span><span class="on"></span><span></span><span></span><span class="on"></span><span></span><span></span><span class="on"></span><span></span><span></span><span class="on"></span><span></span><span></span><span class="on"></span><span></span><span></span>
         </div>
         <div class="rhythm-cap">Illustrative month: one cell per day</div>
-        <p>Short sessions that fit into the day, many times a month.</p>
+        <p>Less listening per day, spread across many days a month.</p>
       </div>
       <div class="arch reveal">
         <div class="who">Web, connected devices &amp; others</div>
         <h3>Infrequent and long</h3>
         <div class="arch-stats">
           <div><div class="n">~5</div><div class="u">active days / month</div></div>
-          <div><div class="n">~2–4 hr</div><div class="u">per session</div></div>
+          <div><div class="n">~2–4 hr</div><div class="u">per day</div></div>
         </div>
         <div class="rhythm" style="--c:var(--web)" aria-hidden="true">
           <span></span><span></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span class="on"></span><span></span><span></span>
         </div>
         <div class="rhythm-cap">Illustrative month: one cell per day</div>
-        <p>Long sessions a few days a month, likely background listening at a desk, at home or at a gathering.</p>
+        <p>Hours of listening on just a few days a month, likely background listening at a desk, at home or at a gathering.</p>
       </div>
     </div>
     <div class="also reveal">
@@ -733,7 +729,7 @@
       </div>
       <div class="rec reveal">
         <div class="finding"><span class="k">Finding</span><b>Two listening modes: frequent and short vs. infrequent and long</b></div>
-        <div><span class="k">Recommendation</span><p>Design and monetize for each mode. Find ways to add active days on long-session platforms (in-car listening, for example), and set ad timing by session length, with ads earlier in short mobile sessions.</p></div>
+        <div><span class="k">Recommendation</span><p>Design and monetize for each mode. Find ways to add active days on long-listening platforms (in-car listening, for example), and set ad timing by typical listening time, with ads earlier on mobile, where listening time per day is shortest.</p></div>
         <div><span class="k">Next study</span><p>A diary study of when and why people listen on each device, and an A/B test of ad frequency.</p></div>
       </div>
     </div>

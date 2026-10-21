@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Screening Pipeline — Case Study</title>
+<meta name="description" content="How I designed an AI assistant that screens 1,300+ job postings against an explainable rubric every weekday and turns them into a 30-second morning brief — and what broke along the way.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#13263A;
+    --night-2:#0C1B2B;
+    --navy:#1F4E78;
+    --sky:#9CC3E6;
+    --paper:#FBF9F5;
+    --cream:#F2EEE6;
+    --ink:#1C1B19;
+    --body:#3B3A37;
+    --muted:#6B6A63;
+    --clay:#C6613F;
+    --clay-dark:#A84F31;
+    --line:rgba(28,27,25,0.12);
+    --pursue:#2E7D32; --pursue-bg:#D7F2D9; --pursue-ink:#1B5E20;
+    --maybe:#B8860B;  --maybe-bg:#FFF3C4;  --maybe-ink:#7A5B00;
+    --pass:#9E9E9E;
+    --neg-bg:#FBE3E1; --neg-ink:#9A2B22;
+    --zero-bg:#EEEDE8; --zero-ink:#5A5952;
+    --base-bg:#E3EAF0; --base-ink:#1F4E78;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Inter',sans-serif; font-size:16px; line-height:1.6;
+  }
+  h1,h2,h3{ font-family:'Fraunces',serif; font-weight:600; margin:0; }
+  .wrap{ max-width:760px; margin:0 auto; padding:0 28px; }
+  .wide{ max-width:1180px; margin:0 auto; padding:0 28px; }
+  @media (max-width:520px){ .wrap,.wide{ padding:0 16px; } }
+  .mono{ font-family:'JetBrains Mono',ui-monospace,monospace; font-size:.86em; }
+
+  .eyebrow{
+    display:flex; align-items:center; gap:.6em;
+    font-size:.78rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--clay); font-weight:600; margin-bottom:.9rem;
+  }
+  .eyebrow .n{
+    font-family:'JetBrains Mono',monospace; font-size:.72rem; letter-spacing:0;
+    border:1px solid currentColor; border-radius:4px; padding:0 5px; line-height:1.5;
+  }
+
+  /* HERO */
+  .hero{
+    background:radial-gradient(120% 140% at 12% -10%, #24476A 0%, var(--night) 48%, var(--night-2) 100%);
+    color:#EEF2F6; padding:84px 0 64px; position:relative; overflow:hidden;
+  }
+  .hero .wrap{ position:relative; z-index:2; }
+  .hero .kicker{
+    font-size:.74rem; letter-spacing:.14em; text-transform:uppercase; color:var(--sky);
+    margin-bottom:20px; display:flex; gap:10px; align-items:center;
+  }
+  .hero .kicker .dot{ width:8px; height:8px; border-radius:50%; background:var(--clay); display:inline-block; }
+  .hero h1{ font-size:clamp(2.1rem, 5vw, 3.1rem); line-height:1.12; letter-spacing:-0.01em; max-width:17ch; }
+  .hero h1 .hl{ color:#F1B79F; font-style:italic; }
+  .hero p.sub{ margin-top:18px; max-width:52ch; font-size:1.06rem; color:rgba(238,242,246,.82); }
+  .stats{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:38px;
+  }
+  @media (max-width:700px){ .stats{ grid-template-columns:1fr 1fr; } }
+  .stat{
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+    border-radius:12px; padding:16px 16px 14px;
+  }
+  .stat .big{ font-family:'Fraunces',serif; font-size:2rem; line-height:1; color:#fff; }
+  .stat .lbl{ font-size:.8rem; color:rgba(238,242,246,.72); margin-top:8px; line-height:1.35; }
+  .stat .lbl em{ color:rgba(238,242,246,.5); font-style:normal; }
+  .meta-row{
+    display:flex; flex-wrap:wrap; gap:26px 34px; margin-top:34px; padding-top:24px;
+    border-top:1px solid rgba(238,242,246,.16);
+  }
+  .meta-item .label{ font-size:.7rem; text-transform:uppercase; letter-spacing:.1em; color:var(--sky); margin-bottom:4px; }
+  .meta-item .val{ font-size:.92rem; color:#EEF2F6; }
+  .scope-note{
+    margin-top:26px; font-size:.86rem; color:rgba(238,242,246,.7);
+    border-left:2px solid var(--clay); padding-left:12px; max-width:62ch;
+  }
+  .scope-note a{ color:#F1B79F; }
+  .deco{ position:absolute; right:36px; top:96px; z-index:1; width:300px; opacity:.95; }
+  @media (max-width:1240px){ .deco{ display:none; } }
+  .mini{
+    background:#FCFCFB; color:#2E2C27; border-radius:8px; padding:12px 14px 12px 16px;
+    box-shadow:0 16px 34px rgba(0,0,0,.4); border-left:5px solid var(--c);
+    font-size:12px; line-height:1.4; margin-bottom:12px; width:270px;
+  }
+  .mini b{ display:block; font-size:12.5px; margin-bottom:6px; }
+  .mini .chips{ display:flex; gap:4px; flex-wrap:wrap; }
+  .mini .chips span{ border-radius:3px; padding:0 5px; font-size:10.5px; font-weight:600; }
+  .mini:nth-child(1){ transform:rotate(-4deg) translateX(6px); }
+  .mini:nth-child(2){ transform:rotate(2deg) translateX(-18px); }
+  .mini:nth-child(3){ transform:rotate(-2deg) translateX(10px); }
+
+  /* SECTIONS */
+  section{ padding:64px 0; }
+  section.alt{ background:var(--cream); }
+  .section-title{ font-size:1.7rem; line-height:1.25; margin-bottom:14px; }
+  .lead{ font-size:1.05rem; color:#444; max-width:60ch; margin:0; }
+  .lead + .lead{ margin-top:12px; }
+  ul.tight{ margin:14px 0 0; padding-left:20px; }
+  ul.tight li{ font-size:.95rem; margin-bottom:9px; color:var(--body); }
+
+  .three-col{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:28px; }
+  @media (max-width:760px){ .three-col{ grid-template-columns:1fr; } }
+  .pill-card{ background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:20px 22px; }
+  section:not(.alt) .pill-card{ background:#fff; }
+  .pill-card h3{ font-size:1.02rem; margin-bottom:8px; color:var(--navy); }
+  .pill-card p{ margin:0; font-size:.93rem; color:var(--body); }
+  .pill-card ul{ margin:0; padding-left:18px; font-size:.93rem; color:var(--body); }
+  .pill-card li{ margin-bottom:5px; }
+  .pill-card.owned{ border-top:3px solid var(--clay); }
+
+  /* PIPELINE */
+  .flow{
+    display:grid; grid-template-columns:repeat(6,1fr); grid-template-rows:auto auto;
+    column-gap:30px; row-gap:30px; margin-top:34px;
+  }
+  .node{
+    position:relative; text-align:left; cursor:pointer;
+    background:#fff; border:1px solid var(--line); border-radius:12px;
+    padding:14px 14px 12px; font:inherit; color:inherit;
+    transition:border-color .25s, box-shadow .25s, transform .25s;
+  }
+  .node:hover{ border-color:rgba(31,78,120,.45); }
+  .node:focus-visible{ outline:2px solid var(--clay); outline-offset:3px; }
+  .node.on{ border-color:var(--navy); box-shadow:0 10px 26px rgba(19,38,58,.14); transform:translateY(-2px); }
+  .node .step-n{ font-family:'JetBrains Mono',monospace; font-size:.7rem; color:var(--clay); display:block; margin-bottom:4px; }
+  .node .nm{ font-family:'Fraunces',serif; font-weight:600; font-size:1.02rem; line-height:1.2; display:block; color:var(--night); }
+  .node .ds{ font-size:.76rem; color:var(--muted); display:block; margin-top:5px; line-height:1.35; }
+  .node.core{ background:var(--night); border-color:var(--night); }
+  .node.core .nm{ color:#fff; } .node.core .ds{ color:rgba(238,242,246,.7); } .node.core .step-n{ color:#F1B79F; }
+  .node.side{ grid-row:2; grid-column:5; background:transparent; border-style:dashed; }
+  .flow > .node:not(.side):not(:nth-child(6))::after{
+    content:''; position:absolute; top:50%; right:-26px; width:22px; height:2px; background:#B9B5AB;
+  }
+  .flow > .node:not(.side):not(:nth-child(6))::before{
+    content:''; position:absolute; top:calc(50% - 4px); right:-27px; border:5px solid transparent; border-left:7px solid #B9B5AB;
+    border-right:0;
+  }
+  .node.side::after{
+    content:''; position:absolute; left:50%; top:-26px; width:2px; height:22px; background:#B9B5AB;
+  }
+  .node.side::before{
+    content:''; position:absolute; left:calc(50% - 4px); top:-28px; border:5px solid transparent; border-bottom:7px solid #B9B5AB; border-top:0;
+  }
+  .flow-detail{
+    grid-row:2; grid-column:1 / span 4; align-self:start;
+    background:#fff; border:1px solid var(--line); border-left:3px solid var(--clay);
+    border-radius:10px; padding:16px 20px; min-height:140px;
+  }
+  .flow-detail h3{ font-size:1.05rem; color:var(--night); margin-bottom:6px; }
+  .flow-detail p{ margin:0 0 8px; font-size:.93rem; color:var(--body); }
+  .flow-detail .rule{ font-size:.9rem; color:var(--ink); }
+  .flow-detail .rule b{ color:var(--clay-dark); }
+  .flow-detail .fstat{ font-size:.8rem; color:var(--muted); margin:0; }
+  .flow-hint{ font-size:.82rem; color:var(--muted); margin-top:14px; }
+  @media (max-width:900px){
+    .flow{ grid-template-columns:1fr; grid-template-rows:none; row-gap:22px; }
+    .node.side{ grid-row:auto; grid-column:auto; margin-left:28px; }
+    .node.side::after, .node.side::before{ display:none; }
+    .flow > .node:not(.side):not(:nth-child(6))::after{ top:auto; bottom:-20px; right:auto; left:28px; width:2px; height:18px; }
+    .flow > .node:not(.side):not(:nth-child(6))::before{ top:auto; bottom:-22px; right:auto; left:24px; border:5px solid transparent; border-top:7px solid #B9B5AB; border-bottom:0; }
+    .flow-detail{ grid-row:auto; grid-column:auto; order:-1; position:sticky; top:8px; z-index:3; box-shadow:0 10px 18px -12px rgba(19,38,58,.35); }
+  }
+
+  /* RUBRIC */
+  .rubric{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:28px; }
+  @media (max-width:640px){ .rubric{ grid-template-columns:1fr; } }
+  .rb{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px 18px; border-top:3px solid var(--c); }
+  .rb h3{ font-size:.98rem; margin-bottom:2px; }
+  .rb .how{ font-size:.78rem; color:var(--muted); margin-bottom:8px; display:block; }
+  .rb ul{ margin:0; padding-left:18px; font-size:.9rem; color:var(--body); }
+  .rb li{ margin-bottom:4px; }
+
+  .tabs{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:30px 0 4px; }
+  .tabs button{
+    font:inherit; font-size:.86rem; cursor:pointer; border:1px solid var(--line); background:#fff;
+    border-radius:99px; padding:6px 14px; color:var(--body); transition:all .2s;
+  }
+  .tabs button .vp{ font-weight:600; margin-left:4px; }
+  .tabs button.on{ background:var(--night); color:#fff; border-color:var(--night); }
+  .tabs button:focus-visible{ outline:2px solid var(--clay); outline-offset:2px; }
+  .fig-title{ font-family:'Fraunces',serif; font-weight:600; font-size:1rem; color:var(--clay-dark); text-align:center; margin:26px 0 8px; }
+  .chart-card{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px 18px 14px; }
+  section.alt .chart-card{ background:var(--paper); }
+  .chart-box{ position:relative; width:100%; height:320px; }
+  @media (max-width:640px){ .chart-box{ height:280px; } }
+  .chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; justify-content:center; }
+  .chip{ font-size:.76rem; font-weight:600; border-radius:3px; padding:2px 7px; line-height:1.45; }
+  .chip.base{ background:var(--base-bg); color:var(--base-ink); }
+  .chip.pos{ background:var(--pursue-bg); color:var(--pursue-ink); }
+  .chip.neg{ background:var(--neg-bg); color:var(--neg-ink); }
+  .chip.zero{ background:var(--zero-bg); color:var(--zero-ink); }
+  .chip.tot{ background:var(--night); color:#fff; }
+  .wf-caption{ font-size:.9rem; color:var(--body); text-align:center; max-width:60ch; margin:12px auto 0; }
+  .fine{ font-size:.8rem; color:var(--muted); }
+
+  /* BRIEF MOCK */
+  .mock-grid{ display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:40px; margin-top:34px; align-items:start; }
+  @media (max-width:900px){ .mock-grid{ grid-template-columns:1fr; gap:26px; } }
+  .browser{ border-radius:12px; overflow:hidden; border:1px solid var(--line); box-shadow:0 18px 40px rgba(19,38,58,.14); background:#FCFCFB; }
+  .browser .bar{ background:#E9E6DF; padding:9px 12px; display:flex; gap:6px; align-items:center; }
+  .browser .bar i{ width:10px; height:10px; border-radius:50%; background:#CFCBC2; display:inline-block; }
+  .browser .bar span{ margin-left:10px; font-size:11px; color:#8a8880; font-family:'JetBrains Mono',monospace; }
+  .bm{ font-family:-apple-system,"Segoe UI",Roboto,sans-serif; color:#2E2C27; -webkit-font-smoothing:antialiased; }
+  .bm .band-top{ background:#F9F9F7; border-bottom:1px solid #E1E1DF; padding:28px 28px 22px; }
+  .bm .band-bottom{ background:#FCFCFB; padding:26px 28px 30px; }
+  .bm .daydate{ font-size:12px; letter-spacing:.04em; color:#6B6A63; margin:0 0 8px; }
+  .bm .headline{ font-family:'Fraunces',Georgia,serif; font-weight:600; font-size:28px; line-height:1.15; margin:0; }
+  .bm .dayquote{ font-style:italic; font-size:13px; color:#6B6A63; margin:6px 0 0; }
+  .bm h4{ font-size:11px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; margin:0 0 12px; }
+  .bm .block{ margin-bottom:26px; } .bm .block:last-child{ margin-bottom:0; }
+  .bm .lead2{ font-size:13px; color:#6B6A63; line-height:1.55; margin:0 0 12px; }
+  .bm .lead2 u, .bm .s u{ text-underline-offset:2px; }
+  .bm ol{ list-style:none; margin:0; padding:0; counter-reset:it; }
+  .bm li{ position:relative; padding-left:24px; margin-bottom:14px; counter-increment:it; }
+  .bm li::before{ content:counter(it); position:absolute; left:0; top:1px; color:#B4B3A8; font-size:12px; }
+  .bm .t{ display:block; font-size:14px; font-weight:600; line-height:1.35; margin-bottom:3px; }
+  .bm .t .lk{ border-bottom:1px solid #E4E3DC; }
+  .bm .s{ font-size:13px; color:#6B6A63; line-height:1.55; margin:0; }
+  .bm .v-pursue{ background:#D7F2D9; color:#1B5E20; font-weight:600; padding:0 5px; border-radius:3px; }
+  .bm .v-maybe{ background:#FFF3C4; color:#7A5B00; font-weight:600; padding:0 5px; border-radius:3px; }
+  .bm .sal{ display:inline-block; font-size:11px; font-weight:600; padding:0 6px; border-radius:3px; background:#EEEDE8; color:#5A5952; white-space:nowrap; }
+  .bm .due{ display:inline-block; font-size:11px; font-weight:600; padding:0 6px; border-radius:3px; margin-left:6px; vertical-align:1px; }
+  .bm .due-over{ background:#FBE3E1; color:#9A2B22; } .bm .due-today{ background:#FDE4CC; color:#8A4300; }
+  .co{
+    display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%;
+    background:var(--clay); color:#fff; font:600 10.5px/1 'Inter',sans-serif; vertical-align:2px; margin:0 3px;
+    transition:transform .25s, box-shadow .25s;
+  }
+  .co.hot{ transform:scale(1.3); box-shadow:0 0 0 4px rgba(198,97,63,.25); }
+  .bm .hi{ transition:background .3s; border-radius:3px; }
+  .bm .hi.hot{ background:rgba(198,97,63,.13); }
+  .notes{ list-style:none; margin:0; padding:0; counter-reset:n; }
+  .notes li{
+    position:relative; padding:12px 14px 12px 46px; margin-bottom:10px; border-radius:10px;
+    border:1px solid transparent; cursor:default; transition:background .25s, border-color .25s;
+  }
+  .notes li.hot{ background:#fff; border-color:var(--line); }
+  .notes li .num{
+    position:absolute; left:12px; top:13px; width:22px; height:22px; border-radius:50%;
+    background:var(--clay); color:#fff; font:600 12px/22px 'Inter',sans-serif; text-align:center;
+  }
+  .notes h3{ font-size:.98rem; margin-bottom:3px; color:var(--night); }
+  .notes p{ margin:0; font-size:.9rem; color:var(--body); }
+
+  /* BUGS */
+  .ladder{ margin-top:30px; position:relative; }
+  .rung{
+    display:grid; grid-template-columns:44px 1fr; gap:14px; margin-bottom:14px; align-items:start;
+  }
+  .rung .mark{
+    width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-weight:600; font-size:1.1rem; background:var(--neg-bg); color:var(--neg-ink); border:1px solid rgba(154,43,34,.2);
+  }
+  .rung.yes .mark{ background:var(--pursue-bg); color:var(--pursue-ink); border-color:rgba(27,94,32,.25); }
+  .rung .body{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 16px; }
+  .rung.yes .body{ border-color:rgba(46,125,50,.45); }
+  .rung h3{ font-size:.98rem; margin-bottom:3px; }
+  .rung h3 .hyp{ font-family:'Inter',sans-serif; font-weight:600; font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:2px; }
+  .rung p{ margin:0; font-size:.9rem; color:var(--body); }
+  .rung p b{ color:var(--ink); }
+  .before-after{
+    display:flex; flex-wrap:wrap; align-items:center; gap:18px 30px; margin-top:24px;
+    background:var(--night); color:#EEF2F6; border-radius:14px; padding:24px 28px;
+  }
+  .ba{ text-align:center; }
+  .ba .num{ font-family:'Fraunces',serif; font-size:2.6rem; line-height:1; }
+  .ba .num.bad{ color:#F3A99A; } .ba .num.good{ color:#9ED8A3; }
+  .ba .cap{ font-size:.78rem; color:rgba(238,242,246,.7); margin-top:6px; max-width:18ch; }
+  .ba-arrow{ font-size:1.6rem; color:rgba(238,242,246,.5); }
+  .ba-text{ flex:1; min-width:220px; font-size:.92rem; color:rgba(238,242,246,.86); }
+  .ba-text strong{ color:#fff; }
+
+  .lessons{ margin-top:30px; display:grid; gap:12px; }
+  .lesson{
+    display:grid; grid-template-columns:1fr 1fr 1.05fr; gap:0; background:#fff; border:1px solid var(--line);
+    border-radius:10px; overflow:hidden;
+  }
+  .lesson > div{ padding:12px 16px; font-size:.88rem; color:var(--body); }
+  .lesson > div + div{ border-left:1px solid var(--line); }
+  .lesson .k{ display:block; font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; font-weight:600; color:var(--muted); margin-bottom:3px; }
+  .lesson .rule{ background:#FBF3EF; color:var(--ink); }
+  .lesson .rule .k{ color:var(--clay-dark); }
+  @media (max-width:700px){
+    .lesson{ grid-template-columns:1fr; }
+    .lesson > div + div{ border-left:0; border-top:1px solid var(--line); }
+  }
+
+  /* LOGS */
+  .two-charts{ display:grid; grid-template-columns:1fr 1fr; gap:26px; margin-top:10px; }
+  @media (max-width:900px){ .two-charts{ grid-template-columns:1fr; } }
+  .callout{
+    margin-top:22px; background:#fff; border:1px solid var(--line); border-left:3px solid var(--clay);
+    border-radius:10px; padding:14px 18px; font-size:.92rem; color:var(--body);
+  }
+  .callout b{ color:var(--ink); }
+
+  /* TIMELINE */
+  .timeline{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:30px; }
+  @media (max-width:760px){ .timeline{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:420px){ .timeline{ grid-template-columns:1fr; } }
+  .stage{ background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:16px 16px 14px; }
+  .stage .when{ font-family:'JetBrains Mono',monospace; font-size:.74rem; color:var(--clay); display:block; margin-bottom:6px; }
+  .stage h3{ font-size:.95rem; margin-bottom:4px; color:var(--night); }
+  .stage p{ font-size:.84rem; color:var(--body); margin:0; line-height:1.5; }
+
+  /* PRINCIPLES */
+  .principles{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:28px; }
+  @media (max-width:860px){ .principles{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:560px){ .principles{ grid-template-columns:1fr; } }
+  .principle{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px 18px; }
+  .principle .tag{ font-size:.68rem; text-transform:uppercase; letter-spacing:.09em; color:var(--clay-dark); font-weight:600; display:block; margin-bottom:5px; }
+  .principle h3{ font-size:1rem; margin-bottom:5px; color:var(--night); }
+  .principle p{ margin:0; font-size:.88rem; color:var(--body); }
+
+  .next{
+    background:var(--night-2); color:#EEF2F6; border-radius:16px; padding:34px 34px; margin-top:34px;
+    display:grid; grid-template-columns:auto 1fr; gap:26px; align-items:start;
+  }
+  @media (max-width:640px){ .next{ grid-template-columns:1fr; padding:26px 22px; } }
+  .next .lbl{ font-family:'Fraunces',serif; font-size:2.6rem; line-height:1; color:#F1B79F; }
+  .next h3{ font-size:1.2rem; color:#fff; margin-bottom:8px; }
+  .next p{ margin:0 0 10px; font-size:.93rem; color:rgba(238,242,246,.84); }
+  .next ul{ margin:0; padding-left:18px; font-size:.92rem; color:rgba(238,242,246,.84); }
+  .next li{ margin-bottom:5px; }
+  .next li b{ color:#fff; }
+
+  .note{ font-size:.82rem; color:#8a8880; margin:0; }
+  footer{ background:var(--night-2); color:rgba(238,242,246,.6); text-align:center; padding:40px 0; font-size:.84rem; }
+  footer a{ color:#F1B79F; text-decoration:none; } footer a:hover{ text-decoration:underline; }
+
+  .reveal{ opacity:0; transform:translateY(14px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.in{ opacity:1; transform:none; }
+  .no-js .reveal{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    .reveal,.node,.co,.notes li{ transition:none; }
+    .reveal{ opacity:1; transform:none; }
+  }
+</style>
+</head>
+<body class="no-js">
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker"><span class="dot"></span>AI Workflows · 2026</div>
+    <h1>Building an AI assistant that screens <span class="hl">1,300+</span> job postings a quarter</h1>
+    <p class="sub">How I turned “is this job worth my time?” into an explainable rubric, a pipeline that runs every weekday morning, and a morning brief I can read in 30 seconds — plus what broke along the way.</p>
+    <div class="stats">
+      <div class="stat"><div class="big">1,321</div><div class="lbl">postings screened and logged</div></div>
+      <div class="stat"><div class="big">64</div><div class="lbl">weekday runs, unattended</div></div>
+      <div class="stat"><div class="big">5.7%</div><div class="lbl">surfaced as “Pursue”</div></div>
+      <div class="stat"><div class="big">~1 hr</div><div class="lbl">saved per day <em>(my estimate)</em></div></div>
+    </div>
+    <div class="meta-row">
+      <div class="meta-item"><div class="label">Role</div><div class="val">Sole designer &amp; operator</div></div>
+      <div class="meta-item"><div class="label">Built with</div><div class="val">Claude scheduled tasks &amp; skills · Gmail · Notion · Python</div></div>
+      <div class="meta-item"><div class="label">Data</div><div class="val">My own job search · Jul 22 – Oct 21, 2026</div></div>
+    </div>
+    <p class="scope-note">This page covers how the system was designed and built. How accurate its scores are is a separate study, now underway — <a href="#next">see the end</a>.</p>
+  </div>
+  <div class="deco" aria-hidden="true">
+    <div class="mini" style="--c:#2E7D32"><b>Data Scientist · Pursue 7/10</b><div class="chips"><span style="background:#E3EAF0;color:#1F4E78">Base fit 6</span><span style="background:#D7F2D9;color:#1B5E20">+2</span><span style="background:#FBE3E1;color:#9A2B22">−1</span></div></div>
+    <div class="mini" style="--c:#B8860B"><b>UX Researcher · Maybe 6/10 🔄</b><div class="chips"><span style="background:#E3EAF0;color:#1F4E78">Base fit 8</span><span style="background:#D7F2D9;color:#1B5E20">+1</span><span style="background:#FBE3E1;color:#9A2B22">−2</span><span style="background:#FBE3E1;color:#9A2B22">−1</span></div></div>
+    <div class="mini" style="--c:#9E9E9E"><b>Product Analyst · Pass 4/10 🔄</b><div class="chips"><span style="background:#E3EAF0;color:#1F4E78">Base fit 7</span><span style="background:#D7F2D9;color:#1B5E20">+2</span><span style="background:#FBE3E1;color:#9A2B22">−2</span><span style="background:#FBE3E1;color:#9A2B22">−2</span><span style="background:#FBE3E1;color:#9A2B22">−1</span></div></div>
+  </div>
+</header>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><span class="n">01</span> Key strengths</div>
+    <h2 class="section-title">Design highlights</h2>
+    <ul class="tight">
+      <li><strong>Made a fuzzy judgment explicit.</strong> “Is this worth my time?” became a written rubric, and every score is stored with the factors that produced it.</li>
+      <li><strong>One source of truth.</strong> Every view I read is rebuilt from a single tracker, so any view can be regenerated safely after a fix.</li>
+      <li><strong>A human signs off before anything irreversible.</strong> The assistant reads, scores and drafts; I approve before anything is logged or a resume is built.</li>
+      <li><strong>Debugged like an experiment.</strong> When it failed, I tested competing explanations until one survived, rather than patching symptoms.</li>
+      <li><strong>Let usage data drive the design.</strong> The system’s own logs showed where it wasted effort, and I redesigned around them.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="n">02</span> The problem</div>
+    <h2 class="section-title">The decision: where do today’s tailoring hours go?</h2>
+    <p class="lead">My job alerts brought in about <strong>20 new postings every weekday</strong>, and up to 87 on a Monday. Many were reposts of roles that had already failed to fill, and the email snippets often misdescribed the job. Triaging them by hand cost about an hour a day, and the decision at the end was always the same: <strong>which two or three roles get a tailored application today?</strong></p>
+    <div class="three-col">
+      <div class="pill-card owned">
+        <h3>What I owned</h3>
+        <ul>
+          <li>The rubric and scoring rules</li>
+          <li>The pipeline architecture and sign-off gates</li>
+          <li>The brief’s design</li>
+          <li>Diagnosing every failure</li>
+        </ul>
+      </div>
+      <div class="pill-card">
+        <h3>What Claude does</h3>
+        <ul>
+          <li>Runs each weekday on a schedule</li>
+          <li>Reads postings, applies the rubric, logs rows</li>
+          <li>Rebuilds the digest and brief</li>
+          <li>Drafts resume changes on request</li>
+        </ul>
+      </div>
+      <div class="pill-card">
+        <h3>What stays with me</h3>
+        <ul>
+          <li>Which roles to apply to</li>
+          <li>Approving each step before it’s written</li>
+          <li>Every application I submit</li>
+          <li>Changing the criteria</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><span class="n">03</span> Architecture</div>
+    <h2 class="section-title">Three scheduled tasks, one source of truth</h2>
+    <p class="lead">Each stage does one job and hands off through files, not memory. Nothing downstream edits what’s upstream: the digest and brief are rebuilt from the tracker every time.</p>
+  </div>
+  <div class="wide">
+    <div class="flow" role="group" aria-label="Pipeline stages. Select a stage to see what it does.">
+      <button class="node" type="button" data-k="alerts"><span class="step-n">IN</span><span class="nm">Job alerts</span><span class="ds">Alert emails in Gmail</span></button>
+      <button class="node core" type="button" data-k="eval"><span class="step-n">TASK 1</span><span class="nm">Evaluate</span><span class="ds">Dedup → pre-screen → read → score</span></button>
+      <button class="node" type="button" data-k="tracker"><span class="step-n">STORE</span><span class="nm">Tracker</span><span class="ds">Single source of truth</span></button>
+      <button class="node" type="button" data-k="digest"><span class="step-n">AUTO</span><span class="nm">Digest</span><span class="ds">Rebuilt from the tracker</span></button>
+      <button class="node core" type="button" data-k="brief"><span class="step-n">TASK 3</span><span class="nm">Morning brief</span><span class="ds">The 30-second glance</span></button>
+      <button class="node" type="button" data-k="apply"><span class="step-n">ON REQUEST</span><span class="nm">Apply</span><span class="ds">Gated logging + tailoring</span></button>
+      <button class="node side" type="button" data-k="news"><span class="step-n">TASK 2 · FEEDS THE BRIEF</span><span class="nm">Newsletter digest</span><span class="ds">Industry newsletters, summarized</span></button>
+      <div class="flow-detail" aria-live="polite">
+        <h3 id="fd-title"></h3>
+        <p id="fd-what"></p>
+        <p class="rule"><b>Design rule:</b> <span id="fd-rule"></span></p>
+        <p class="fstat" id="fd-stat"></p>
+      </div>
+    </div>
+    <p class="flow-hint">Select any stage to see what it does and the rule behind it.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="n">04</span> Measurement</div>
+    <h2 class="section-title">Making “fit” explicit</h2>
+    <p class="lead">I wrote down what I was looking for as a rubric the assistant applies to every posting. Any must-have failure or red flag rejects a role outright; everything else starts from a base-fit judgment and moves up or down by named amounts.</p>
+    <div class="rubric">
+      <div class="rb reveal" style="--c:#1F4E78"><h3>Must-haves</h3><span class="how">Fail one and the role is rejected</span>
+        <ul><li>New York area, or remote</li><li>A pay floor, tested against the <em>top</em> of a posted band, not the midpoint</li></ul></div>
+      <div class="rb reveal" style="--c:#9A2B22"><h3>Red flags</h3><span class="how">Automatic reject</span>
+        <ul><li>Machine-learning engineering dressed as “data science”</li><li>Posting no longer accepting applications</li><li>A math/CS degree required, with no behavioral alternative</li></ul></div>
+      <div class="rb reveal" style="--c:#2E7D32"><h3>Boosts</h3><span class="how">Raise the score</span>
+        <ul><li>A 0–3 year experience bar (strong)</li><li>Posted in the last 48 hours; under 50 applicants</li><li>Wants a behavioral or cognitive-science background</li><li>Accepts a PhD in place of years</li></ul></div>
+      <div class="rb reveal" style="--c:#C6613F"><h3>Penalties</h3><span class="how">Lower the score</span>
+        <ul><li>Reposted, or first posted over a week ago (heavy)</li><li>5+ years required, or a Staff/Lead title</li><li>Mostly qualitative; heavy required travel</li><li>Over 100 applicants (light)</li></ul></div>
+    </div>
+
+    <div class="fig-title">Every score shows its working</div>
+    <div class="tabs" role="tablist" aria-label="Example postings">
+      <button type="button" role="tab" data-ex="0" class="on" aria-selected="true">Data Scientist<span class="vp" style="color:#2E7D32">7</span></button>
+      <button type="button" role="tab" data-ex="1" aria-selected="false">UX Researcher<span class="vp" style="color:#B8860B">6</span></button>
+      <button type="button" role="tab" data-ex="2" aria-selected="false">Product Analyst<span class="vp" style="color:#7d7d7d">4</span></button>
+    </div>
+    <div class="chart-card">
+      <div class="chart-box" id="wfChart" role="img" aria-label="Waterfall chart of one posting's score, from a base-fit score through each adjustment to the final score out of 10."></div>
+      <div class="chips" id="wfChips"></div>
+    </div>
+    <p class="wf-caption" id="wfCaption"></p>
+    <p class="fine" style="text-align:center;margin-top:8px;">Real postings from the tracker; employers generalized. Pay is scored on every posting but shown here only as its effect.</p>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><span class="n">05</span> User experience</div>
+    <h2 class="section-title">Designed for a 30-second glance</h2>
+    <p class="lead">I was the user, so I could iterate daily. Each feature of the brief exists because an earlier version made me read too much, miss something, or misread a good role as a bad one.</p>
+  </div>
+  <div class="wide">
+    <div class="mock-grid">
+      <div class="browser reveal" aria-label="Mockup of the morning brief with placeholder content">
+        <div class="bar"><i></i><i></i><i></i><span>morning-brief.html</span></div>
+        <div class="bm">
+          <div class="band-top">
+            <p class="daydate">Wednesday · October 21 2026</p>
+            <p class="headline"><span class="hi" data-c="5">Morning Brief</span><span class="co" data-c="5">5</span></p>
+            <p class="dayquote">“Small, steady steps beat the occasional sprint.”</p>
+          </div>
+          <div class="band-bottom">
+            <div class="block">
+              <h4>Needs attention</h4>
+              <ol>
+                <li><span class="t">Follow up with a recruiter<span class="due due-over">Overdue · 1 day</span></span><p class="s">A quick networking task marked Immediate in your job-search task tracker.</p></li>
+                <li><span class="t">Prep notes for Friday’s call<span class="due due-today">Due today</span></span><p class="s">A deep-effort task marked Immediate in the tracker.</p></li>
+              </ol>
+            </div>
+            <div class="block">
+              <h4>Job search digest</h4>
+              <p class="lead2">See the full rundown — 21 postings evaluated, 19 passed over, 3 pre-screened out on title ⏭️ — in the <u>rendered digest</u>.</p>
+              <ol>
+                <li><span class="t"><span class="lk hi" data-c="4">Marketplace Co. – Data Scientist, Payments</span><span class="co" data-c="4">4</span></span>
+                  <p class="s"><span class="v-pursue">Pursue, 7/10</span> — <span class="hi" data-c="1">a core SQL, experimentation and statistics match with a 2+ year bar, but over 100 people have already applied</span><span class="co" data-c="1">1</span> <span class="sal hi" data-c="3">Salary +0 · match alone ≈ 7/10</span><span class="co" data-c="3">3</span>, <u class="hi" data-c="4">in today’s job digest</u>.</p></li>
+                <li><span class="t"><span class="lk">Insurer Co. – User Experience Researcher</span> <span class="hi" data-c="2">🔄</span><span class="co" data-c="2">2</span></span>
+                  <p class="s"><span class="v-maybe">Maybe, 6/10</span> — mixed-methods research that names a cognitive psychology PhD as a plus, but it was reposted two days ago. <span class="sal">Salary +0 · match alone ≈ 6/10</span>, <u>in today’s job digest</u>.</p></li>
+              </ol>
+            </div>
+            <div class="block">
+              <h4>Newsletter</h4>
+              <ol><li><span class="t">A new pay-benchmark report for analytics roles</span><p class="s">One new issue since the last run, with a section on how research teams are hiring this quarter, <u>in the newsletter digest</u>.</p></li></ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ol class="notes">
+        <li data-c="1"><span class="num">1</span><h3>Two-sided blurbs</h3><p>Each role gets its strongest positive, then its biggest catch, in one sentence. Added after early briefs listed only the negatives, so 7/10 roles read like rejections.</p></li>
+        <li data-c="2"><span class="num">2</span><h3>Markers you can scan</h3><p>🔄 reposted · 🆔 relisted under a new ID · ⚠️ page didn’t fully load. Reposts always sort to the bottom of their section, because they rarely convert.</p></li>
+        <li data-c="3"><span class="num">3</span><h3>Pay, separated from fit</h3><p>A chip shows how many points pay added or took away, so a strong match is never hidden by a pay rule — and I can see the job match on its own.</p></li>
+        <li data-c="4"><span class="num">4</span><h3>Two links, two jobs</h3><p>The title opens the posting; “in today’s job digest” jumps straight to that role’s full card, with every field and factor.</p></li>
+        <li data-c="5"><span class="num">5</span><h3>A locked layout</h3><p>One unattended run quietly redesigned the page, and the regression lasted five days before I caught it. The layout is now a written contract: no change unless I ask for it in words.</p></li>
+      </ol>
+    </div>
+    <p class="fine" style="margin-top:18px;">Mockup with placeholder content, rebuilt with the real brief’s styles.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="n">06</span> Debugging</div>
+    <h2 class="section-title">The hardest bugs returned confident wrong answers</h2>
+    <p class="lead">In the first week, <strong>42% of postings came back without a description</strong>. The scores still looked complete, so the failure was easy to miss. I treated it as a research problem: list the explanations, test each one, keep the one that survives.</p>
+    <div class="ladder">
+      <div class="rung reveal"><div class="mark" aria-label="Ruled out">✗</div><div class="body"><h3><span class="hyp">Hypothesis 1</span>The browser window was too small</h3><p><b>Test:</b> measured the page before and after resizing. It was already full-size, and resizing changed nothing.</p></div></div>
+      <div class="rung reveal"><div class="mark" aria-label="Ruled out">✗</div><div class="body"><h3><span class="hyp">Hypothesis 2</span>The tab was in the background, so the page paused</h3><p><b>Test:</b> forced the page to report itself as visible and waited. Still no description.</p></div></div>
+      <div class="rung reveal"><div class="mark" aria-label="Ruled out">✗</div><div class="body"><h3><span class="hyp">Hypothesis 3</span>The site was rate-limiting us</h3><p>Failures came in bursts, which fit. <b>Test:</b> the same postings loaded instantly from a different source, back to back. Not a rate limit.</p></div></div>
+      <div class="rung yes reveal"><div class="mark" aria-label="Confirmed">✓</div><div class="body"><h3><span class="hyp">Confirmed</span>A background request the page needs to draw the description failed on every load</h3><p><b>Test:</b> watching network traffic showed that request failing each time. A server-rendered source returned full descriptions for all 22 test postings, including every one that had failed that day.</p></div></div>
+    </div>
+    <div class="before-after reveal">
+      <div class="ba"><div class="num bad">42%</div><div class="cap">descriptions missing, first audit (42 of 101)</div></div>
+      <div class="ba-arrow" aria-hidden="true">→</div>
+      <div class="ba"><div class="num good">0.3%</div><div class="cap">missing since the fix (3 of 895)</div></div>
+      <div class="ba-text"><strong>All 42 early failures were later re-fetched and completed.</strong> Rows that fail to load are flagged, retried, and superseded by the complete row, so a bad morning never leaves a permanent gap.</div>
+    </div>
+
+    <h3 style="font-size:1.15rem;margin:46px 0 4px;color:var(--night);">Four more silent failures, and the rule each one left behind</h3>
+    <p class="lead" style="font-size:.97rem;">None of these raised an error. Each looked like a plausible answer.</p>
+    <div class="lessons">
+      <div class="lesson reveal"><div><span class="k">What it looked like</span>Every posting had “salary not stated”</div><div><span class="k">What was wrong</span>The pattern never matched the site’s abbreviated “$###.#K/yr” format</div><div class="rule"><span class="k">Rule</span>Confirm a field is really empty before recording it as empty</div></div>
+      <div class="lesson reveal"><div><span class="k">What it looked like</span>Reposted roles scored as fresh</div><div><span class="k">What was wrong</span>One source can’t see repost status at all (missed on 14 of 39 jobs)</div><div class="rule"><span class="k">Rule</span>Use two independent sources; each covers the other’s blind spots</div></div>
+      <div class="lesson reveal"><div><span class="k">What it looked like</span>A closed posting scored Pursue 7/10</div><div><span class="k">What was wrong</span>“No longer accepting applications” was invisible to the first source</div><div class="rule"><span class="k">Rule</span>Check for red flags in the source that can see them — and verify against a control</div></div>
+      <div class="lesson reveal"><div><span class="k">What it looked like</span>A good row kept being re-fetched and flagged ⚠️</div><div><span class="k">What was wrong</span>A note that merely <em>mentioned</em> an earlier failure contained the failure flag’s text</div><div class="rule"><span class="k">Rule</span>Use fixed marker phrases, and never use them in passing</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><span class="n">07</span> Iteration</div>
+    <h2 class="section-title">Its own logs changed the design</h2>
+    <p class="lead">Because every posting is logged with how it was handled, the tracker doubles as usage data. Two patterns drove the biggest changes: how steeply the funnel narrows, and how much of Monday’s pile is reposts.</p>
+  </div>
+  <div class="wide">
+    <div class="two-charts">
+      <div>
+        <div class="fig-title">From inbox to shortlist</div>
+        <div class="chart-card reveal"><div class="chart-box" id="funnelChart" role="img" aria-label="Funnel: 1,573 listings logged from alerts; 1,321 new to the tracker; 993 read in full and scored; 362 rated Pursue or Maybe; 75 rated Pursue."></div></div>
+        <p class="fine" style="margin-top:8px;">Duplicates within a single morning’s emails are collapsed before logging, so the first bar is a floor.</p>
+      </div>
+      <div>
+        <div class="fig-title">Share of new listings that were reposts</div>
+        <div class="chart-card reveal"><div class="chart-box" id="repostChart" role="img" aria-label="Bar chart of repost share by weekday: Monday 57%, Tuesday 73%, Wednesday 16%, Thursday 24%, Friday 28%."></div></div>
+        <p class="fine" style="margin-top:8px;">Listings checked for repost status, Jul 22 – Oct 21. Hover or tap a bar for counts.</p>
+      </div>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="callout reveal"><b>The change: Monday triage mode.</b> Weekend alerts pile up, and on Mondays and Tuesdays <b>61%</b> of listings were reposts, against <b>23%</b> later in the week. So after a weekend or any gap over 36 hours, every listing gets the cheap checks, but only the 25 most promising get a full read. The rest are logged, not lost: if one reappears later in the week, it gets a full evaluation then. The trade-off is real — it caused one miss I know of, a reposted role I’d have wanted that never got a full read.</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow"><span class="n">08</span> Timeline</div>
+    <h2 class="section-title">Changed whenever use exposed a problem</h2>
+    <div class="timeline">
+      <div class="stage reveal"><span class="when">Jul 22</span><h3>First run</h3><p>Scores each morning’s alerts against my written criteria.</p></div>
+      <div class="stage reveal"><span class="when">Jul 24</span><h3>Fetch fix</h3><p>New source after 42% of descriptions came back empty.</p></div>
+      <div class="stage reveal"><span class="when">Aug 19</span><h3>Format lock</h3><p>After an unattended run quietly redesigned the brief.</p></div>
+      <div class="stage reveal"><span class="when">Sep 9</span><h3>Relists re-scored</h3><p>A relisted role often changes pay or seniority, so it’s re-read, not skipped.</p></div>
+      <div class="stage reveal"><span class="when">Oct 2</span><h3>Pay transparency</h3><p>Every score shows how much of it came from pay.</p></div>
+      <div class="stage reveal"><span class="when">Oct 11</span><h3>Monday triage</h3><p>Weekend piles are mostly reposts, so full reads are capped.</p></div>
+      <div class="stage reveal"><span class="when">Oct 12</span><h3>Score factors</h3><p>Every factor that moved a score is stored with it.</p></div>
+      <div class="stage reveal"><span class="when">Oct 13</span><h3>Employer sites</h3><p>Weekly searches of selected career sites, beyond LinkedIn.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><span class="n">09</span> Takeaways</div>
+    <h2 class="section-title">Principles I’d bring to any AI workflow</h2>
+    <p class="lead">The same standards I’d hold an HR screening tool or a research pipeline to.</p>
+    <div class="principles">
+      <div class="principle reveal"><span class="tag">Explainability</span><h3>Every judgment shows its reasons</h3><p>A score without its factors can’t be checked, challenged or improved.</p></div>
+      <div class="principle reveal"><span class="tag">Data integrity</span><h3>One source of truth</h3><p>Views are rebuilt from it, never patched, so fixes propagate everywhere.</p></div>
+      <div class="principle reveal"><span class="tag">Validity</span><h3>Silence isn’t evidence</h3><p>An empty field may be a broken reader. Confirm absence before recording it.</p></div>
+      <div class="principle reveal"><span class="tag">Oversight</span><h3>People own irreversible steps</h3><p>Automate the reading and drafting; gate anything that writes or sends.</p></div>
+      <div class="principle reveal"><span class="tag">Efficiency</span><h3>Cheap checks first</h3><p>Spend expensive reads only where a good fit is plausible.</p></div>
+      <div class="principle reveal"><span class="tag">Stability</span><h3>Write the contract down</h3><p>Unattended systems drift. Lock what works and change it on purpose.</p></div>
+    </div>
+
+    <div class="next reveal" id="next">
+      <div class="lbl">Next</div>
+      <div>
+        <h3>Validating the judge</h3>
+        <p>This page shows how the system works, not how good its judgments are. That’s the next study, and I’ll add it here:</p>
+        <ul>
+          <li><b>Agreement:</b> do its scores match my own, rated blind?</li>
+          <li><b>Reliability:</b> does it give the same posting the same score twice?</li>
+          <li><b>Calibration:</b> does a 7 mean the same thing for every kind of role?</li>
+          <li><b>Pre-screen recall:</b> how many good roles does the title-only filter throw away?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:36px 0;">
+  <div class="wrap">
+    <p class="note">Counts come from the system’s own tracker, Jul 22 – Oct 21, 2026. Employer names in examples are generalized, the brief shown is a mockup with placeholder content, and pay thresholds are omitted.</p>
+  </div>
+</section>
+
+<footer>
+  AI Screening Pipeline — Case Study · Daniel King<br>
+  <a href="index.html#portfolio">← Back to portfolio</a>
+</footer>
+
+<script>
+(function(){
+  document.body.classList.remove('no-js');
+  var revealEls = [].slice.call(document.querySelectorAll('.reveal'));
+  if ('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, { threshold:0.12 });
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else { revealEls.forEach(function(el){ el.classList.add('in'); }); }
+
+  /* ---------- pipeline detail ---------- */
+  var D = {
+    alerts:{ t:'Job alerts', w:'Job-alert emails land in a Gmail label each day. Each email bundles several postings, and the same posting often turns up in several emails.', r:'Identify each posting by its job ID, never by the email it arrived in.', s:'1,573 listings logged from alerts so far.' },
+    eval:{ t:'Evaluate (scheduled, weekdays before 6 AM)', w:'Checks each listing against the tracker, drops obvious mismatches on title alone, reads the full posting for the rest, and scores it against my written criteria.', r:'Cheap checks first. A title check costs almost nothing; a full read is saved for plausible fits.', s:'306 skipped on title alone · 993 read in full and scored.' },
+    tracker:{ t:'Tracker', w:'A spreadsheet with one row per posting: score, verdict, every factor behind the score, how it was fetched, and where it came from.', r:'Append-only. Rows are never edited or deleted, so every past judgment stays auditable.', s:'1,321 rows · 252 repeat listings caught and logged separately.' },
+    digest:{ t:'Digest (rebuilt after every evaluation run)', w:'The full rundown for the day. Pursue and Maybe roles get detail cards; Passes get one line with the deciding reason.', r:'Rebuilt from the tracker every time, never merged into, so it can be regenerated safely after any fix.', s:'64 daily digests so far.' },
+    brief:{ t:'Morning brief (scheduled)', w:'One calm page: what needs me today from my task tracker, the day’s Pursue and Maybe roles, and a summary of industry newsletters.', r:'Built for a 30-second glance, with the layout written down as a contract.', s:'65 briefs so far.' },
+    apply:{ t:'Apply (on request)', w:'When I name a role from the brief, the assistant pulls the full posting, proposes which kind of role it is, logs the application and offers to tailor my resume.', r:'It stops for my confirmation at each gate before anything is written.', s:'Three sign-off gates before a tailored resume is built.' },
+    news:{ t:'Newsletter digest (scheduled)', w:'A separate task summarizes the industry newsletters I follow and pulls out anything relevant to my search.', r:'It feeds the brief as its own section, so the brief stays one page.', s:'' }
+  };
+  var nodes = [].slice.call(document.querySelectorAll('.node'));
+  function pick(k){
+    nodes.forEach(function(n){ var on = n.dataset.k === k; n.classList.toggle('on', on); n.setAttribute('aria-pressed', on); });
+    var d = D[k];
+    document.getElementById('fd-title').textContent = d.t;
+    document.getElementById('fd-what').textContent = d.w;
+    document.getElementById('fd-rule').textContent = d.r;
+    document.getElementById('fd-stat').textContent = d.s;
+  }
+  nodes.forEach(function(n){
+    n.addEventListener('click', function(){ pick(n.dataset.k); });
+    n.addEventListener('mouseenter', function(){ if (window.matchMedia('(hover:hover)').matches) pick(n.dataset.k); });
+  });
+  pick('eval');
+
+  /* ---------- brief mock callouts ---------- */
+  var notes = [].slice.call(document.querySelectorAll('.notes li'));
+  var marks = [].slice.call(document.querySelectorAll('.bm [data-c], .bm .co'));
+  function hot(c){
+    notes.forEach(function(li){ li.classList.toggle('hot', li.dataset.c === c); });
+    marks.forEach(function(m){ m.classList.toggle('hot', m.dataset.c === c); });
+  }
+  notes.forEach(function(li){
+    li.addEventListener('mouseenter', function(){ hot(li.dataset.c); });
+    li.addEventListener('mouseleave', function(){ hot(null); });
+    li.addEventListener('click', function(){ hot(li.dataset.c); });
+  });
+  [].slice.call(document.querySelectorAll('.bm .co')).forEach(function(m){
+    m.addEventListener('mouseenter', function(){ hot(m.dataset.c); });
+    m.addEventListener('mouseleave', function(){ hot(null); });
+  });
+})();
+</script>
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  function el(tag, attrs, parent, text){
+    var e=document.createElementNS(NS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text!=null) e.textContent=text;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function svgIn(host){
+    host.innerHTML='';
+    var W=Math.max(260, host.clientWidth), H=host.clientHeight||300;
+    var s=el('svg',{width:W,height:H,viewBox:'0 0 '+W+' '+H,'aria-hidden':'true'},host);
+    s.style.display='block'; s.style.overflow='visible';
+    return {s:s,W:W,H:H};
+  }
+  function wrap(label, max){
+    var out=[]; label.split(' ').forEach(function(w){ var l=out[out.length-1]; if(l && (l+' '+w).length<=max) out[out.length-1]=l+' '+w; else out.push(w); });
+    return out;
+  }
+  var tip=document.createElement('div');
+  tip.style.cssText='position:fixed;pointer-events:none;z-index:50;background:#13263A;color:#fff;font:500 12.5px/1.4 Inter,sans-serif;padding:6px 9px;border-radius:6px;max-width:260px;opacity:0;transition:opacity .15s;';
+  document.body.appendChild(tip);
+  function bindTip(node, text){
+    function show(e){ tip.textContent=text; tip.style.opacity=1; var x=(e.touches?e.touches[0].clientX:e.clientX), y=(e.touches?e.touches[0].clientY:e.clientY); tip.style.left=Math.min(x+12, window.innerWidth-tip.offsetWidth-8)+'px'; tip.style.top=(y-tip.offsetHeight-10)+'px'; }
+    node.addEventListener('mousemove', show); node.addEventListener('touchstart', show, {passive:true});
+    node.addEventListener('mouseleave', function(){ tip.style.opacity=0; });
+    node.addEventListener('touchend', function(){ setTimeout(function(){ tip.style.opacity=0; }, 1600); });
+    node.style.cursor='default';
+  }
+  var INK='#1C1B19', MUTED='#6B6A63', GRID='rgba(136,135,128,0.18)', AX='rgba(136,135,128,0.45)';
+  var C={ base:'#1F4E78', pos:'#2E7D32', neg:'#B5452F', zero:'#A8A69E', tot:'#13263A' };
+
+  /* ---------- score waterfall ---------- */
+  var EX = [
+    { verdict:'Pursue', role:'Online marketplace · Data Scientist, Payments',
+      cap:'A solid core match with a low experience bar. The crowd of applicants costs a point, but it still clears the Pursue line.',
+      f:[ ['Base fit',6,'SQL, experimentation, stats; no ML'], ['Low experience bar',2,'2+ years'], ['Applicants',-1,'over 100'], ['Pay',0,'no effect'] ] },
+    { verdict:'Maybe', role:'Health insurer · User Experience Researcher',
+      cap:'A top-tier base fit, pulled down to Maybe almost entirely by timing: it had been reposted.',
+      f:[ ['Base fit',8,'mixed-methods UXR; cognitive-psych PhD named as a plus'], ['Behavioral background wanted',1,''], ['Reposted',-2,'2 days ago'], ['Applicants',-1,'over 100'], ['Pay',0,'no effect'] ] },
+    { verdict:'Pass', role:'Retailer · Product Analyst',
+      cap:'A good fit buried by its history: reposted, and first listed a month earlier. That’s the rubric working as intended — stale reqs rarely convert.',
+      f:[ ['Base fit',7,'experimentation and measurement'], ['Low experience bar',2,'0–3 years'], ['Reposted',-2,'3 days ago'], ['First posted',-2,'~1 month ago'], ['Applicants',-1,'over 100'], ['Pay',0,'no effect'] ] }
+  ];
+  var cur=0;
+  function sgn(v){ return v>0?'+'+v:(v<0?'−'+Math.abs(v):'±0'); }
+  function drawWF(){
+    var host=document.getElementById('wfChart'), g=svgIn(host), s=g.s, W=g.W, H=g.H;
+    var ex=EX[cur], narrow=W<480;
+    var ml=narrow?30:40, mr=8, mt=24, mb=narrow?52:46;
+    var iw=W-ml-mr, ih=H-mt-mb, y=function(v){ return mt+ih-(v/10)*ih; };
+    for (var t=0;t<=10;t+=2){ el('line',{x1:ml,x2:W-mr,y1:y(t),y2:y(t),stroke:t?GRID:AX,'stroke-width':1},s); el('text',{x:ml-8,y:y(t)+4,'text-anchor':'end','font-size':11,fill:MUTED},s,t); }
+    el('text',{x:12,y:mt+ih/2,'font-size':11,fill:MUTED,'text-anchor':'middle',transform:'rotate(-90 12 '+(mt+ih/2)+')'},s, narrow?'':'Score (out of 10)');
+    var items=ex.f.map(function(r){return r;}).concat([['Final score',null,'']]);
+    var n=items.length, band=iw/n, bw=Math.min(54, band*0.64), run=0, prevTop=null;
+    items.forEach(function(r,i){
+      var a,b,col,lab;
+      if (i===0){ a=0; b=r[1]; run=b; col=C.base; lab=String(r[1]); }
+      else if (r[1]===null){ a=0; b=run; col=C.tot; lab=run+'/10'; }
+      else { a=run; b=run+r[1]; run=b; col=r[1]>0?C.pos:(r[1]<0?C.neg:C.zero); lab=sgn(r[1]); }
+      var lo=Math.min(a,b), hi=Math.max(a,b), x=ml+band*i+(band-bw)/2;
+      var h=Math.max(y(lo)-y(hi), 3), top=(hi===lo)? y(hi)-1.5 : y(hi);
+      if (i>0){ var cx=ml+band*(i-1)+(band+bw)/2; el('line',{x1:cx,x2:x,y1:y(a),y2:y(a),stroke:'#B9B5AB','stroke-dasharray':'3 3','stroke-width':1},s); }
+      var rect=el('rect',{x:x,y:top,width:bw,height:h,rx:4,fill:col},s);
+      rect.style.transition='opacity .4s'; 
+      el('text',{x:x+bw/2,y:top-7,'text-anchor':'middle','font-size':12,'font-weight':600,fill:INK},s,lab);
+      var lines=wrap(r[0], narrow?9:13);
+      var tx=el('text',{x:x+bw/2,y:mt+ih+16,'text-anchor':'middle','font-size':narrow?10:11,fill:'#3B3A37'},s);
+      lines.forEach(function(L,k){ el('tspan',{x:x+bw/2,dy:k?13:0},tx,L); });
+      var tipText = i===0 ? 'Base fit '+r[1]+' — '+r[2] : (r[1]===null ? 'Final score: '+run+'/10, '+ex.verdict : sgn(r[1])+' '+r[0]+(r[2]?' — '+r[2]:''));
+      bindTip(rect, tipText);
+    });
+    var chips=document.getElementById('wfChips'); chips.innerHTML='';
+    ex.f.forEach(function(r,k){
+      var sp=document.createElement('span'), v=r[1];
+      sp.className='chip '+(k===0?'base':(v>0?'pos':(v<0?'neg':'zero')));
+      sp.textContent = k===0 ? 'Base fit '+v+': '+r[2] : (v>0?'+'+v:(v<0?'−'+Math.abs(v):'+0'))+': '+r[0]+(r[2]?' ('+r[2]+')':'');
+      chips.appendChild(sp);
+    });
+    var t2=document.createElement('span'); t2.className='chip tot'; t2.textContent='→ '+run+'/10 '+ex.verdict; chips.appendChild(t2);
+    document.getElementById('wfCaption').innerHTML='<strong>'+ex.role+'.</strong> '+ex.cap;
+    [].slice.call(document.querySelectorAll('.tabs button')).forEach(function(bt){ var on=+bt.dataset.ex===cur; bt.classList.toggle('on',on); bt.setAttribute('aria-selected',on); });
+  }
+  [].slice.call(document.querySelectorAll('.tabs button')).forEach(function(bt){ bt.addEventListener('click', function(){ cur=+bt.dataset.ex; drawWF(); }); });
+
+  /* ---------- funnel ---------- */
+  var F=[ ['Logged from alerts',1573,'#9CB6CE'], ['New to the tracker',1321,'#5F86AA'], ['Read in full & scored',993,'#1F4E78'], ['Pursue or Maybe',362,'#B8860B'], ['Pursue',75,'#2E7D32'] ];
+  function drawFunnel(){
+    var host=document.getElementById('funnelChart'), g=svgIn(host), s=g.s, W=g.W, H=g.H;
+    var rowH=(H-6)/F.length, max=1573, mr=58, bw=W-mr;
+    F.forEach(function(r,i){
+      var y0=i*rowH+4;
+      el('text',{x:0,y:y0+13,'font-size':12.5,fill:'#3B3A37','font-weight':500},s,r[0]);
+      var w=Math.max(4, bw*r[1]/max);
+      var rect=el('rect',{x:0,y:y0+20,width:w,height:Math.min(22,rowH-28),rx:4,fill:r[2]},s);
+      el('text',{x:w+8,y:y0+20+Math.min(22,rowH-28)/2+4,'font-size':12.5,'font-weight':600,fill:INK},s,r[1].toLocaleString());
+      bindTip(rect, r[1].toLocaleString()+' listings'+(i?' — '+(r[1]/1321*100).toFixed(1)+'% of new listings':''));
+    });
+  }
+
+  /* ---------- reposts by weekday ---------- */
+  var Wd=[ ['Mon',177,311], ['Tue',69,94], ['Wed',31,200], ['Thu',49,202], ['Fri',59,208] ];
+  function drawRepost(){
+    var host=document.getElementById('repostChart'), g=svgIn(host), s=g.s, W=g.W, H=g.H;
+    var ml=40, mr=6, mt=22, mb=28, iw=W-ml-mr, ih=H-mt-mb, y=function(v){ return mt+ih-(v/100)*ih; };
+    [0,25,50,75,100].forEach(function(t){ el('line',{x1:ml,x2:W-mr,y1:y(t),y2:y(t),stroke:t?GRID:AX},s); el('text',{x:ml-8,y:y(t)+4,'text-anchor':'end','font-size':11,fill:MUTED},s,t+'%'); });
+    var band=iw/Wd.length, bw=Math.min(58, band*0.6);
+    Wd.forEach(function(r,i){
+      var p=r[1]/r[2]*100, x=ml+band*i+(band-bw)/2;
+      var rect=el('rect',{x:x,y:y(p),width:bw,height:y(0)-y(p),rx:4,fill:i<2?'#C6613F':'#1F4E78'},s);
+      el('text',{x:x+bw/2,y:y(p)-7,'text-anchor':'middle','font-size':12,'font-weight':600,fill:INK},s,Math.round(p)+'%');
+      el('text',{x:x+bw/2,y:mt+ih+18,'text-anchor':'middle','font-size':12,fill:'#3B3A37'},s,r[0]);
+      bindTip(rect, r[1]+' of '+r[2]+' listings were reposts');
+    });
+  }
+
+  function all(){ drawWF(); drawFunnel(); drawRepost(); }
+  all();
+  var rt; window.addEventListener('resize', function(){ clearTimeout(rt); rt=setTimeout(all, 120); });
+})();
+</script>
+</body>
+</html>

@@ -239,8 +239,9 @@
     transition:transform .25s, box-shadow .25s;
   }
   .co.hot{ transform:scale(1.3); box-shadow:0 0 0 4px rgba(198,97,63,.25); }
-  .bm .hi{ transition:background .3s; border-radius:3px; }
+  .bm .hi, .dg .hi{ transition:background .3s, box-shadow .3s; border-radius:3px; }
   .bm .hi.hot{ background:rgba(198,97,63,.13); }
+  .dg .hi.hot{ box-shadow:0 0 0 3px rgba(198,97,63,.35); background-color:rgba(198,97,63,.06); }
   .notes{ list-style:none; margin:0; padding:0; counter-reset:n; }
   .notes li{
     position:relative; padding:12px 14px 12px 46px; margin-bottom:10px; border-radius:10px;
@@ -253,6 +254,33 @@
   }
   .notes h3{ font-size:.98rem; margin-bottom:3px; color:var(--night); }
   .notes p{ margin:0; font-size:.9rem; color:var(--body); }
+
+
+  /* DIGEST MOCK */
+  .dg{ background:#FAFAF7; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:#222; padding:22px 22px 26px; }
+  .dg h4.dh{ font-size:19px; margin:0 0 4px; font-weight:700; }
+  .dg .cnt{ color:#555; margin:0 0 14px; font-size:12.5px; line-height:1.5; }
+  .dg h5{ font-size:15px; margin:18px 0 8px; font-weight:700; }
+  .dg .card{ background:#fff; border-left:5px solid var(--b); border-radius:6px; padding:11px 14px; margin:0 0 10px; box-shadow:0 1px 2px rgba(0,0,0,.06); }
+  .dg .card h6{ margin:0 0 5px; font-size:14px; font-weight:700; }
+  .dg .verd{ font-size:12px; color:#444; margin-bottom:5px; }
+  .dg ul{ margin:0; padding-left:16px; font-size:12px; line-height:1.5; }
+  .dg ul li{ margin:0; }
+  .dg .chips2{ font-size:10.5px; margin-top:6px; line-height:1.9; }
+  .dg .chips2 span{ display:inline-block; border-radius:3px; padding:0 5px; margin:0 3px 0 0; font-weight:500; line-height:1.6; }
+  .dg .b{ background:#E3EAF0; color:#1F4E78; } .dg .p{ background:#D7F2D9; color:#1B5E20; } .dg .n{ background:#FBE3E1; color:#9A2B22; } .dg .z{ background:#EEEDE8; color:#5A5952; } .dg .t{ background:#1F4E78; color:#fff; font-weight:700 !important; }
+  .dg .lnk{ font-size:12px; margin-top:7px; color:#1a5fb4; }
+  .dg .lnk u{ text-underline-offset:2px; }
+  .dg .tb{ display:inline-block; font-size:11px; font-weight:600; padding:0 7px; margin-left:6px; border:1px solid #D8D7CF; border-radius:10px; background:#F3F2EE; color:#5A5952; }
+  .dg .prev{ border-left:4px solid #546E7A; background:#fff; border-radius:6px; padding:9px 12px; }
+  .dg .prev p{ font-size:11.5px; color:#555; font-style:italic; margin:0 0 6px; }
+  .dg .pass{ border-left:4px solid #9E9E9E; background:#fff; border-radius:6px; padding:9px 12px 9px 28px; margin:0; font-size:12px; line-height:1.5; color:#333; }
+  .dg .pass li{ margin:0 0 8px; } .dg .pass li:last-child{ margin:0; }
+  .dg .more{ color:#888; font-style:italic; list-style:none; margin-left:-12px; }
+  .dg .short .verd{ margin-bottom:0; }
+  .dg .hi{ position:relative; }
+  .dg .co.pin, .dg .chips2 span.co.pin{ position:absolute; top:-9px; right:-9px; margin:0; padding:0; display:inline-flex; width:18px; height:18px; border-radius:50%; background:var(--clay); color:#fff; font:600 10.5px/1 'Inter',sans-serif; z-index:2; }
+  .dg ul.hi > .co.pin{ list-style:none; }
 
   /* BUGS */
   .ladder{ margin-top:26px; display:grid; grid-template-columns:1fr 1fr; gap:0 18px; }
@@ -357,8 +385,8 @@
 <header class="hero">
   <div class="wrap">
     <div class="kicker"><span class="dot"></span>AI Workflows · 2026</div>
-    <h1>Building a job search AI assistant</h1>
-    <p class="sub">How I saved myself countless hours (and serious LinkedIn fatigue) by automating the job posting evaluation process, turning “is this job worth my time?” into an explainable rubric, a pipeline that runs every weekday morning, and a morning brief I can read in 30 seconds.</p>
+    <h1>Building an AI assistant that screens <span class="hl">1,300+</span> job postings a quarter</h1>
+    <p class="sub">How I turned “is this job worth my time?” into an explainable rubric, a pipeline that runs every weekday morning, and a brief I can read in 30 seconds.</p>
     <div class="stats">
       <div class="stat"><div class="big">1,321</div><div class="lbl">postings screened and logged</div></div>
       <div class="stat"><div class="big">64</div><div class="lbl">weekday runs, unattended</div></div>
@@ -520,7 +548,92 @@
 
 <section>
   <div class="wrap">
-    <div class="eyebrow"><span class="n">05</span> Debugging</div>
+    <div class="eyebrow"><span class="n">05</span> Detail</div>
+    <h2 class="section-title">One click deeper: the full digest</h2>
+    <p class="lead">Every role in the brief links to its card in the day’s full digest, where everything behind the score is laid out — and where the roles the brief leaves out still get a line.</p>
+  </div>
+  <div class="wide">
+    <div class="mock-grid">
+      <div class="browser reveal" aria-label="Mockup of the full job digest with placeholder content">
+        <div class="bar"><i></i><i></i><i></i><span>job-digest-2026-10-21.html</span></div>
+        <div class="dg">
+          <h4 class="dh">Job Search Digest — 2026-10-21</h4>
+          <p class="cnt">21 postings evaluated: 1 Pursue, 1 Maybe, 19 Pass. 2 previously-evaluated listings reappeared and were skipped.</p>
+          <h5>Pursue</h5>
+          <div class="card" style="--b:#2E7D32">
+            <h6>Marketplace Co. — Data Scientist, Payments <span style="color:#2E7D32">(7/10)</span></h6>
+            <div class="verd"><b>Verdict:</b> Pursue — 2+ year data scientist role centered on SQL, experimentation and statistics, no machine learning required</div>
+            <ul class="hi" data-c="1">
+              <li><b>Compensation:</b> Not stated in posting</li>
+              <li><b>Min years required:</b> 2+ years in a data science, analytics or quantitative role</li>
+              <li><b>Location:</b> New York, NY (Hybrid)</li>
+              <li><b>Date posted:</b> 2 days ago (not reposted)</li>
+              <li><b>Must-haves failed:</b> None</li>
+              <li><b>Nice-to-haves hit:</b> 2+ year bar (strong boost); primarily quantitative; no production ML</li>
+              <li><b>Negatives:</b> Over 100 people clicked apply</li>
+              <li><b>Matches:</b> Advanced SQL (daily querying and pipeline work on the hedge-fund research platform); Python and R for statistical analysis; designing and analyzing controlled experiments (20+ in the PhD); building metrics where none existed (behavioral metrics for investment staff); dashboards for decision-makers; turning analyses into recommendations for non-technical stakeholders</li>
+              <li><b>Misses:</b> Payments or fintech domain experience; fraud and risk metrics (listed as preferred); event data at very large scale</li>
+              <li><b>Notes:</b> Full description loaded; still accepting applications. Workplace type confirmed from the posting header. Strong methods match, and the crowd of applicants is the only real drag.</li>
+              <span class="co pin" data-c="1">1</span>
+            </ul>
+            <div class="chips2"><span class="hi" data-c="2" style="padding:0;background:none"><span class="b">Base fit 6: (SQL, experimentation, stats; no ML)</span><span class="p">+2: 2+ yr bar</span><span class="n">−1: &gt;100 applicants</span><span class="z">+0: Salary (not stated)</span><span class="t">→ 7/10</span><span class="co pin" data-c="2">2</span></span></div>
+            <div class="lnk"><u>LinkedIn posting</u> <span class="tb hi" data-c="5">Tailor</span><span class="co" data-c="5">5</span> · <u>Source email</u></div>
+          </div>
+          <h5>Maybe</h5>
+          <div class="card" style="--b:#B8860B">
+            <h6>Insurer Co. — User Experience Researcher <span style="color:#B8860B">(6/10)</span> 🔄</h6>
+            <div class="verd"><b>Verdict:</b> Maybe — strong mixed-methods UXR fit with a cognitive psychology PhD listed as a plus, but reposted and over 100 applicants</div>
+            <ul>
+              <li><b>Compensation:</b> Listed in posting (omitted in this mockup)</li>
+              <li><b>Min years required:</b> 4+ years (a PhD in HCI or cognitive psychology listed as a bonus)</li>
+              <li><b>Location:</b> New York, NY (Hybrid)</li>
+              <li><b>Date posted:</b> Reposted 2 days ago</li>
+              <li><b>Must-haves failed:</b> None</li>
+              <li><b>Nice-to-haves hit:</b> Cognitive or behavioral-science background wanted; 4+ year bar is close to my level</li>
+              <li><b>Negatives:</b> Reposted 2 days ago (heavy); over 100 people clicked apply</li>
+              <li><b>Matches:</b> Mixed-methods research from planning through synthesis (consumer and packaging studies at a product-design consultancy); behavioral data analysis (decision-making metrics on the hedge-fund platform); survey design and Qualtrics programming (legal-industry survey work); communicating findings to design and product partners; PhD in cognitive psychology (named as a bonus)</li>
+              <li><b>Misses:</b> Healthcare or insurance research experience (bonus); research on consumer-facing AI products; Spanish proficiency (bonus)</li>
+              <li><b>Notes:</b> Reposted, but kept for a full read because the title scored 7+ on the quick check. Methods and pay fit well; the repost and applicant volume pull it down to Maybe.</li>
+            </ul>
+            <div class="chips2"><span class="b">Base fit 8: (mixed-methods UXR; cognitive-psych PhD named as a plus)</span><span class="p">+1: behavioral background wanted</span><span class="n">−2: Reposted 2 days ago</span><span class="n">−1: &gt;100 applicants</span><span class="z">+0: Salary</span><span class="t">→ 6/10</span></div>
+            <div class="lnk"><u>LinkedIn posting</u> <span class="tb">Tailor</span> · <u>Source email</u></div>
+          </div>
+          <h5>Previously Evaluated (skipped)</h5>
+          <div class="prev hi" data-c="3">
+            <p>These listings reappeared in today’s alerts. They were evaluated on an earlier date and were not re-scored.</p>
+            <ul>
+              <li>⭐ <b>Research Co. — People Research Scientist</b> — previously <b>Pursue 8/10</b> on 2026-07-24. Same listing. <u style="color:#1a5fb4">Current posting</u></li>
+              <li><b>Fintech Co. — Analyst</b> — previously <b>Maybe 5/10</b> on 2026-09-29. Same listing. <u style="color:#1a5fb4">Current posting</u></li>
+            </ul>
+            <span class="co pin" data-c="3">3</span>
+          </div>
+          <h5>Pass</h5>
+          <ul class="pass hi" data-c="4">
+            <li><b>Retailer — Product Analyst (4/10)</b> 🔄: a good fit, but reposted and first listed a month ago. <u style="color:#1a5fb4">Link</u>
+              <div class="chips2"><span class="b">Base fit 7</span><span class="p">+2: 0–3 yr bar</span><span class="n">−2: Reposted</span><span class="n">−2: first posted ~1 mo ago</span><span class="n">−1: &gt;100 applicants</span><span class="t">→ 4/10</span></div></li>
+            <li><b>Consultancy — Senior Consultant (2/10)</b>: requires up to 50% travel. <u style="color:#1a5fb4">Link</u>
+              <div class="chips2"><span class="b">Base fit 4</span><span class="p">+1: posted 1 day ago</span><span class="p">+1: &lt;50 applicants</span><span class="n">−3: travel up to 50%</span><span class="n">−1: 4–6 yr bar</span><span class="t">→ 2/10</span></div></li>
+            <li><b>Bank — Software Engineer (1/10)</b> ⏭️: pre-screened out on title alone; never loaded. <u style="color:#1a5fb4">Link</u></li>
+            <li class="more">+ 16 more, one line each</li>
+            <span class="co pin" data-c="4">4</span>
+          </ul>
+        </div>
+      </div>
+      <ol class="notes">
+        <li data-c="1"><span class="num">1</span><h3>Every field, not just the verdict</h3><p>Pay, years bar, location and recency, plus matches and misses against my resume, each citing the experience behind it. Every Pursue and Maybe gets the full card.</p></li>
+        <li data-c="2"><span class="num">2</span><h3>The score’s working</h3><p>The same factor chips as the waterfall above, ending in the total.</p></li>
+        <li data-c="3"><span class="num">3</span><h3>Repeats shown, not re-scored</h3><p>Listings I’ve already seen keep their original score. A ⭐ flags a returning Pursue, the most actionable line on the page.</p></li>
+        <li data-c="4"><span class="num">4</span><h3>Passes in one line</h3><p>Each rejection shows its deciding reason and chips, so I can audit it in seconds. ⏭️ marks roles skipped on title alone.</p></li>
+        <li data-c="5"><span class="num">5</span><h3>One click to act</h3><p>“Tailor” starts a tailored-resume request for that role, pre-filled.</p></li>
+      </ol>
+    </div>
+    <p class="fine" style="margin-top:18px;">Mockup with placeholder content, rebuilt with the real digest’s styles.</p>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="eyebrow"><span class="n">06</span> Debugging</div>
     <h2 class="section-title">The hardest bugs returned confident wrong answers</h2>
     <p class="lead">In week one, <strong>42% of postings came back without a description</strong>, yet the scores still looked complete. I listed the possible explanations and tested each one.</p>
     <div class="ladder">
@@ -539,9 +652,9 @@
   </div>
 </section>
 
-<section class="alt">
+<section>
   <div class="wrap">
-    <div class="eyebrow"><span class="n">06</span> Iteration</div>
+    <div class="eyebrow"><span class="n">07</span> Iteration</div>
     <h2 class="section-title">Its own logs changed the design</h2>
     <p class="lead">The tracker doubles as usage data. It showed that most of Monday’s pile was reposts.</p>
   </div>
@@ -556,7 +669,7 @@
 </section>
 
 
-<section class="alt" style="padding-top:8px;">
+<section style="padding-top:8px;">
   <div class="wrap">
     <div class="next reveal" id="next">
       <div class="lbl">Next</div>
@@ -621,21 +734,23 @@
   });
   pick('eval');
 
-  /* ---------- brief mock callouts ---------- */
-  var notes = [].slice.call(document.querySelectorAll('.notes li'));
-  var marks = [].slice.call(document.querySelectorAll('.bm [data-c], .bm .co'));
-  function hot(c){
-    notes.forEach(function(li){ li.classList.toggle('hot', li.dataset.c === c); });
-    marks.forEach(function(m){ m.classList.toggle('hot', m.dataset.c === c); });
-  }
-  notes.forEach(function(li){
-    li.addEventListener('mouseenter', function(){ hot(li.dataset.c); });
-    li.addEventListener('mouseleave', function(){ hot(null); });
-    li.addEventListener('click', function(){ hot(li.dataset.c); });
-  });
-  [].slice.call(document.querySelectorAll('.bm .co')).forEach(function(m){
-    m.addEventListener('mouseenter', function(){ hot(m.dataset.c); });
-    m.addEventListener('mouseleave', function(){ hot(null); });
+  /* ---------- mock callouts (per mockup) ---------- */
+  [].slice.call(document.querySelectorAll('.mock-grid')).forEach(function(grid){
+    var notes=[].slice.call(grid.querySelectorAll('.notes li'));
+    var marks=[].slice.call(grid.querySelectorAll('.browser [data-c]'));
+    function hot(c){
+      notes.forEach(function(li){ li.classList.toggle('hot', li.dataset.c === c); });
+      marks.forEach(function(m){ m.classList.toggle('hot', m.dataset.c === c); });
+    }
+    notes.forEach(function(li){
+      li.addEventListener('mouseenter', function(){ hot(li.dataset.c); });
+      li.addEventListener('mouseleave', function(){ hot(null); });
+      li.addEventListener('click', function(){ hot(li.dataset.c); });
+    });
+    [].slice.call(grid.querySelectorAll('.browser .co')).forEach(function(m){
+      m.addEventListener('mouseenter', function(){ hot(m.dataset.c); });
+      m.addEventListener('mouseleave', function(){ hot(null); });
+    });
   });
 })();
 </script>

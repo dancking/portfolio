@@ -231,6 +231,10 @@
   .bm .v-pursue{ background:#D7F2D9; color:#1B5E20; font-weight:600; padding:0 5px; border-radius:3px; }
   .bm .v-maybe{ background:#FFF3C4; color:#7A5B00; font-weight:600; padding:0 5px; border-radius:3px; }
   .bm .sal{ display:inline-block; font-size:11px; font-weight:600; padding:0 6px; border-radius:3px; background:#EEEDE8; color:#5A5952; white-space:nowrap; }
+  .bm .tb2{ display:inline-block; font-size:11px; font-weight:600; line-height:1.4; padding:0 7px; margin-left:6px; border:1px solid #D8D7CF; border-radius:3px; background:#F3F2EE; color:#5A5952; white-space:nowrap; vertical-align:1px; }
+  .bm .tb2.hot{ background:#E6E1F7; border-color:#C9C0EA; color:#4A3A8C; }
+  .bm .sal-neg{ background:#FBE3E1; color:#9A2B22; }
+  .bm .sal-pos{ background:#D7F2D9; color:#1B5E20; }
   .bm .due{ display:inline-block; font-size:11px; font-weight:600; padding:0 6px; border-radius:3px; margin-left:6px; vertical-align:1px; }
   .bm .due-over{ background:#FBE3E1; color:#9A2B22; } .bm .due-today{ background:#FDE4CC; color:#8A4300; }
   .co{
@@ -241,8 +245,10 @@
   .co.hot{ transform:scale(1.3); box-shadow:0 0 0 4px rgba(198,97,63,.25); }
   .bm .hi, .dg .hi{ transition:background .3s, box-shadow .3s; border-radius:3px; }
   .bm .hi.hot{ background:rgba(198,97,63,.13); }
+  .bm .tb2.hi{ border-radius:3px; }
   .dg .hi.hot{ box-shadow:0 0 0 3px rgba(198,97,63,.35); background-color:rgba(198,97,63,.06); }
   .notes{ list-style:none; margin:0; padding:0; counter-reset:n; }
+  @media (min-width:901px){ .mock-grid .notes{ position:sticky; top:24px; } }
   .notes li{
     position:relative; padding:12px 14px 12px 46px; margin-bottom:10px; border-radius:10px;
     border:1px solid transparent; cursor:default; transition:background .25s, border-color .25s;
@@ -271,7 +277,7 @@
   .dg .b{ background:#E3EAF0; color:#1F4E78; } .dg .p{ background:#D7F2D9; color:#1B5E20; } .dg .n{ background:#FBE3E1; color:#9A2B22; } .dg .z{ background:#EEEDE8; color:#5A5952; } .dg .t{ background:#1F4E78; color:#fff; font-weight:700 !important; }
   .dg .lnk{ font-size:12px; margin-top:7px; color:#1a5fb4; }
   .dg .lnk u{ text-underline-offset:2px; }
-  .dg .tb{ display:inline-block; font-size:11px; font-weight:600; padding:0 7px; margin-left:6px; border:1px solid #D8D7CF; border-radius:10px; background:#F3F2EE; color:#5A5952; }
+  .dg .tb{ display:inline-block; font-size:11px; font-weight:600; padding:0 7px; margin-left:6px; border:1px solid #D8D7CF; border-radius:3px; background:#F3F2EE; color:#5A5952; }
   .dg .prev{ border-left:4px solid #546E7A; background:#fff; border-radius:6px; padding:9px 12px; }
   .dg .prev p{ font-size:11.5px; color:#555; font-style:italic; margin:0 0 6px; }
   .dg .pass{ border-left:4px solid #9E9E9E; background:#fff; border-radius:6px; padding:9px 12px 9px 28px; margin:0; font-size:12px; line-height:1.5; color:#333; }
@@ -402,7 +408,7 @@
   </div>
   <div class="deco" aria-hidden="true">
     <div class="mini" style="--c:#2E7D32"><b>Data Scientist · Pursue 7/10</b><div class="chips"><span style="background:#E3EAF0;color:#1F4E78">Base fit 6</span><span style="background:#D7F2D9;color:#1B5E20">+2</span><span style="background:#FBE3E1;color:#9A2B22">−1</span></div></div>
-    <div class="mini" style="--c:#B8860B"><b>UX Researcher · Maybe 6/10 🔄</b><div class="chips"><span style="background:#E3EAF0;color:#1F4E78">Base fit 8</span><span style="background:#D7F2D9;color:#1B5E20">+1</span><span style="background:#FBE3E1;color:#9A2B22">−2</span><span style="background:#FBE3E1;color:#9A2B22">−1</span></div></div>
+    <div class="mini" style="--c:#B8860B"><b>UX Researcher · Maybe 6/10 🔄</b><div class="chips"><span style="background:#E3EAF0;color:#1F4E78">Base fit 5</span><span style="background:#D7F2D9;color:#1B5E20">+2</span><span style="background:#D7F2D9;color:#1B5E20">+1</span><span style="background:#FBE3E1;color:#9A2B22">−2</span><span style="background:#FBE3E1;color:#9A2B22">−1</span><span style="background:#D7F2D9;color:#1B5E20">+1 pay</span></div></div>
     <div class="mini" style="--c:#9E9E9E"><b>Product Analyst · Pass 4/10 🔄</b><div class="chips"><span style="background:#E3EAF0;color:#1F4E78">Base fit 7</span><span style="background:#D7F2D9;color:#1B5E20">+2</span><span style="background:#FBE3E1;color:#9A2B22">−2</span><span style="background:#FBE3E1;color:#9A2B22">−2</span><span style="background:#FBE3E1;color:#9A2B22">−1</span></div></div>
   </div>
 </header>
@@ -489,7 +495,7 @@
       <div class="chips" id="wfChips"></div>
     </div>
     <p class="wf-caption" id="wfCaption"></p>
-    <p class="fine" style="text-align:center;margin-top:8px;">Real postings from the tracker; employers generalized.</p>
+    <p class="fine" style="text-align:center;margin-top:8px;">Based on real postings from the tracker; employers generalized and some details changed.</p>
   </div>
 </section>
 
@@ -506,7 +512,7 @@
         <div class="bm">
           <div class="band-top">
             <p class="daydate">Wednesday · October 21 2026</p>
-            <p class="headline"><span class="hi" data-c="5">Morning Brief</span><span class="co" data-c="5">5</span></p>
+            <p class="headline"><span class="hi" data-c="6">Morning Brief</span><span class="co" data-c="6">6</span></p>
             <p class="dayquote">“Small, steady steps beat the occasional sprint.”</p>
           </div>
           <div class="band-bottom">
@@ -521,10 +527,10 @@
               <h4>Job search digest</h4>
               <p class="lead2">See the full rundown — 21 postings evaluated, 19 passed over, 3 pre-screened out on title ⏭️ — in the <u>rendered digest</u>.</p>
               <ol>
-                <li><span class="t"><span class="lk hi" data-c="4">Marketplace Co. – Data Scientist, Payments</span><span class="co" data-c="4">4</span></span>
+                <li><span class="t"><span class="lk hi" data-c="4">Marketplace Co. – Data Scientist, Payments</span><span class="co" data-c="4">4</span><span class="tb2 hi" data-c="5">Tailor</span><span class="co" data-c="5">5</span></span>
                   <p class="s"><span class="v-pursue">Pursue, 7/10</span> — <span class="hi" data-c="1">a core SQL, experimentation and statistics match with a 2+ year bar, but over 100 people have already applied</span><span class="co" data-c="1">1</span> <span class="sal hi" data-c="3">Salary +0 · match alone ≈ 7/10</span><span class="co" data-c="3">3</span>, <u class="hi" data-c="4">in today’s job digest</u>.</p></li>
-                <li><span class="t"><span class="lk">Insurer Co. – User Experience Researcher</span> <span class="hi" data-c="2">🔄</span><span class="co" data-c="2">2</span></span>
-                  <p class="s"><span class="v-maybe">Maybe, 6/10</span> — mixed-methods research that names a cognitive psychology PhD as a plus, but it was reposted two days ago. <span class="sal">Salary +0 · match alone ≈ 6/10</span>, <u>in today’s job digest</u>.</p></li>
+                <li><span class="t"><span class="lk">Insurer Co. – User Experience Researcher</span> <span class="hi" data-c="2">🔄</span><span class="co" data-c="2">2</span><span class="tb2">Tailor</span></span>
+                  <p class="s"><span class="v-maybe">Maybe, 6/10</span> — mixed-methods research with a 0–3 year bar that names a cognitive psychology PhD as a plus, but it was reposted two days ago. <span class="sal sal-pos">Salary +1 · match alone ≈ 5/10</span>, <u>in today’s job digest</u>.</p></li>
               </ol>
             </div>
             <div class="block">
@@ -539,7 +545,8 @@
         <li data-c="2"><span class="num">2</span><h3>Markers you can scan</h3><p>🔄 reposted · 🆔 relisted under a new ID · ⚠️ page didn’t fully load. Reposts always sort to the bottom of their section, because they rarely convert.</p></li>
         <li data-c="3"><span class="num">3</span><h3>Pay, separated from fit</h3><p>A chip shows how many points pay added or took away, so a strong match is never hidden by a pay rule — and I can see the job match on its own.</p></li>
         <li data-c="4"><span class="num">4</span><h3>Two links, two jobs</h3><p>The title opens the posting; “in today’s job digest” jumps straight to that role’s full card, with every field and factor.</p></li>
-        <li data-c="5"><span class="num">5</span><h3>A locked layout</h3><p>One unattended run quietly redesigned the page, and the regression lasted five days before I caught it. The layout is now a written contract: no change unless I ask for it in words.</p></li>
+        <li data-c="5"><span class="num">5</span><h3>One-click tailoring</h3><p>The Tailor button next to each role copies a ready-made prompt for that posting and opens my resume-tailoring project, so “this looks good” becomes a tailored draft in one click.</p></li>
+        <li data-c="6"><span class="num">6</span><h3>A locked layout</h3><p>One unattended run quietly redesigned the page, and the regression lasted five days before I caught it. The layout is now a written contract: no change unless I ask for it in words.</p></li>
       </ol>
     </div>
     <p class="fine" style="margin-top:18px;">Mockup with placeholder content, rebuilt with the real brief’s styles.</p>
@@ -582,20 +589,20 @@
           <h5>Maybe</h5>
           <div class="card" style="--b:#B8860B">
             <h6>Insurer Co. — User Experience Researcher <span style="color:#B8860B">(6/10)</span> 🔄</h6>
-            <div class="verd"><b>Verdict:</b> Maybe — strong mixed-methods UXR fit with a cognitive psychology PhD listed as a plus, but reposted and over 100 applicants</div>
+            <div class="verd"><b>Verdict:</b> Maybe — mixed-methods UXR with a 0–3 year bar and a cognitive psychology PhD listed as a plus, but qual-leaning, reposted and over 100 applicants</div>
             <ul>
-              <li><b>Compensation:</b> Listed in posting (omitted in this mockup)</li>
-              <li><b>Min years required:</b> 4+ years (a PhD in HCI or cognitive psychology listed as a bonus)</li>
+              <li><b>Compensation:</b> Listed in posting (figures omitted in this mockup); the top of the band is above my target</li>
+              <li><b>Min years required:</b> 0–3 years (a PhD in HCI or cognitive psychology listed as a bonus)</li>
               <li><b>Location:</b> New York, NY (Hybrid)</li>
               <li><b>Date posted:</b> Reposted 2 days ago</li>
               <li><b>Must-haves failed:</b> None</li>
-              <li><b>Nice-to-haves hit:</b> Cognitive or behavioral-science background wanted; 4+ year bar is close to my level</li>
-              <li><b>Negatives:</b> Reposted 2 days ago (heavy); over 100 people clicked apply</li>
+              <li><b>Nice-to-haves hit:</b> 0–3 year bar (strong boost); cognitive or behavioral-science background wanted; top of band above my target with a low bar</li>
+              <li><b>Negatives:</b> Reposted 2 days ago (heavy); over 100 people clicked apply; leans qualitative</li>
               <li><b>Matches:</b> Mixed-methods research from planning through synthesis (consumer and packaging studies at a product-design consultancy); behavioral data analysis (decision-making metrics on the hedge-fund platform); survey design and Qualtrics programming (legal-industry survey work); communicating findings to design and product partners; PhD in cognitive psychology (named as a bonus)</li>
               <li><b>Misses:</b> Healthcare or insurance research experience (bonus); research on consumer-facing AI products; Spanish proficiency (bonus)</li>
-              <li><b>Notes:</b> Reposted, but kept for a full read because the title scored 7+ on the quick check. Methods and pay fit well; the repost and applicant volume pull it down to Maybe.</li>
+              <li><b>Notes:</b> Reposted, but kept for a full read because the title scored 7+ on the quick check. On its own the job match is middling (≈ 5/10); pay adds a point, and the repost and applicant volume keep it at Maybe.</li>
             </ul>
-            <div class="chips2"><span class="b">Base fit 8: (mixed-methods UXR; cognitive-psych PhD named as a plus)</span><span class="p">+1: behavioral background wanted</span><span class="n">−2: Reposted 2 days ago</span><span class="n">−1: &gt;100 applicants</span><span class="z">+0: Salary</span><span class="t">→ 6/10</span></div>
+            <div class="chips2"><span class="b">Base fit 5: (mixed-methods UXR, qual-leaning; cognitive-psych PhD named as a plus)</span><span class="p">+2: 0–3 yr bar</span><span class="p">+1: behavioral background wanted</span><span class="n">−2: Reposted 2 days ago</span><span class="n">−1: &gt;100 applicants</span><span class="p">+1: Salary (top above target with 0–3 yr bar)</span><span class="t">→ 6/10</span></div>
             <div class="lnk"><u>LinkedIn posting</u> <span class="tb">Tailor</span> · <u>Source email</u></div>
           </div>
           <h5>Previously Evaluated (skipped)</h5>
@@ -794,8 +801,8 @@
       cap:'A solid core match with a low experience bar. The crowd of applicants costs a point, but it still clears the Pursue line.',
       f:[ ['Base fit',6,'SQL, experimentation, stats; no ML'], ['Low experience bar',2,'2+ years'], ['Applicants',-1,'over 100'], ['Pay',0,'no effect'] ] },
     { verdict:'Maybe', role:'Health insurer · User Experience Researcher',
-      cap:'A top-tier base fit, pulled down to Maybe almost entirely by timing: it had been reposted.',
-      f:[ ['Base fit',8,'mixed-methods UXR; cognitive-psych PhD named as a plus'], ['Behavioral background wanted',1,''], ['Reposted',-2,'2 days ago'], ['Applicants',-1,'over 100'], ['Pay',0,'no effect'] ] },
+      cap:'A case where pay moved the score. The job match alone is 5/10; a band topping out above my target, paired with a low experience bar, adds a point and lifts it to 6/10.',
+      f:[ ['Base fit',5,'mixed-methods UXR, qual-leaning; cognitive-psych PhD named as a plus'], ['Low experience bar',2,'0–3 years'], ['Behavioral background wanted',1,''], ['Reposted',-2,'2 days ago'], ['Applicants',-1,'over 100'], ['Pay',1,'top of band above my target, with a 0–3 year bar'] ] },
     { verdict:'Pass', role:'Retailer · Product Analyst',
       cap:'A good fit buried by its history: reposted, and first listed a month earlier. That’s the rubric working as intended — stale reqs rarely convert.',
       f:[ ['Base fit',7,'experimentation and measurement'], ['Low experience bar',2,'0–3 years'], ['Reposted',-2,'3 days ago'], ['First posted',-2,'~1 month ago'], ['Applicants',-1,'over 100'], ['Pay',0,'no effect'] ] }
